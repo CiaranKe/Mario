@@ -6,7 +6,7 @@ import competition.uu2013.common.Map;
 public class ShellSim extends EnemySim
 {
     private float yaa;
-    private boolean carried;
+    public boolean carried;
 
     public ShellSim(float _x, float _y, int _type)
     {
@@ -115,7 +115,9 @@ public class ShellSim extends EnemySim
     {
         if (carried)
         {
-            Enemy.checkShellCollide(this);
+
+            //TODO:
+            //Enemy.checkShellCollide(this);
             return;
         }
 
@@ -152,7 +154,8 @@ public class ShellSim extends EnemySim
 
         if (facing != 0)
         {
-            Enemy.checkShellCollide(this);
+            //TODO:
+            //Enemy.checkShellCollide(this);
         }
 
         if (!move(xa, 0))
@@ -273,6 +276,8 @@ public class ShellSim extends EnemySim
         boolean blocking = Map.isBlocking(x, y, xa, ya);
 
 //        byte block = levelScene.level.getBlock(x, y);
+
+        moveSim.bump(x, y, true);
 
         return blocking;
     }

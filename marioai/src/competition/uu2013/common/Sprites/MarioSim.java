@@ -2,6 +2,7 @@ package competition.uu2013.common.Sprites;
 
 import ch.idsia.benchmark.mario.environments.Environment;
 import competition.uu2013.common.Map;
+import competition.uu2013.common.MoveSim;
 
 public class MarioSim  extends SpriteSim
 {
@@ -20,6 +21,8 @@ public class MarioSim  extends SpriteSim
     private float xJumpSpeed = 0;
     private float yJumpSpeed = 0;
     private boolean keys_last[];
+    private MoveSim moveSim;
+    public EnemySim carried;
 
 
     public static final int KEY_LEFT = 0;
@@ -33,8 +36,8 @@ public class MarioSim  extends SpriteSim
 
     public MarioSim(float _x, float _y, float _xa, float _ya)
     {
-        x = _x;
-        y = _y;
+        lastX = x = _x;
+        lastY = y = _y;
         xa = _xa;
         ya = _ya;
         keys_last = new boolean[Environment.numberOfKeys];
@@ -44,6 +47,8 @@ public class MarioSim  extends SpriteSim
     {
         MarioSim m = new MarioSim(this.x, this.y, this.xa, this.ya);
 
+        m.carried = this.carried;
+        m.moveSim = this.moveSim;
         m.big = this.big;
         m.fire = this.fire;
         m.invulnerableTime = this.invulnerableTime;
@@ -65,6 +70,24 @@ public class MarioSim  extends SpriteSim
 
         return m;
     }
+
+
+    @Override
+    public float getX()
+    {
+        return this.x;
+    }
+
+    @Override
+    public float getY()
+    {
+        return this.y;
+    }
+    public void setMoveSim (MoveSim _sim)
+    {
+        this.moveSim = _sim;
+    }
+
 
     public float getLastX()
     {
@@ -302,11 +325,18 @@ public class MarioSim  extends SpriteSim
         //if (blocking && ya < 0)
             //ws = ws.bump(x, y, big);
 
+        if (blocking && ya < 0)
+        {
+            moveSim.bump(x, y, big);
+        }
+
         return blocking;
     }
 
     public void stomp(SpriteSim enemy)
     {
+        System.out.println(" PREDICTED STOMP!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+        System.out.println("T: " + enemy.type + " X: " + enemy.x + " Y: " + enemy.y);
         float targetY = enemy.y - enemy.height() / 2;
         move(0, targetY - y);
 
@@ -317,6 +347,28 @@ public class MarioSim  extends SpriteSim
         onGround = false;
         sliding = false;
         invulnerableTime = 1;
+        System.out.println("XA: " + xa + " YA: " + ya );
+    }
+
+    public void stomp(boolean [] keys, final ShellSim shell)
+    {
+        if (keys[KEY_SPEED] && shell.facing == 0)
+        {
+            carried = shell;
+            shell.carried = true;
+        } else
+        {
+            float targetY = shell.y - shell.height / 2;
+            move(0, targetY - y);
+
+            xJumpSpeed = 0;
+            yJumpSpeed = -1.9f;
+            jumpTime = 8;
+            ya = jumpTime * yJumpSpeed;
+            onGround = false;
+            sliding = false;
+            invulnerableTime = 1;
+        }
     }
 
     public void getHurt()
@@ -343,7 +395,7 @@ public class MarioSim  extends SpriteSim
             x = _x;
             y = _y;
             xa = (x - lastX) * GROUND_INERTIA;
-            ya = (y - lastY) * AIR_INERTIA;
+            ya = (y - lastY) * AIR_INERTIA + 3.0F;
         }
 
         this.mayJump = _mayJump;

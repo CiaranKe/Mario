@@ -16,24 +16,25 @@ public class Enemy
 {
 
     private static ArrayList<EnemySim> enemiesList;
-    private ArrayList<EnemySim> enemiesListCopy;
 
-    public Enemy()
+    public Enemy() //Fight the power!!
     {
-        this.enemiesListCopy = new ArrayList<EnemySim>();
+
     }
 
-    public Enemy clone(MarioSim marioSim)
+    public static ArrayList<EnemySim> cloneEnemies()
     {
-        Enemy e = new Enemy();
+        ArrayList<EnemySim> enemiesListCopy = new ArrayList<EnemySim>();
 
-        for (EnemySim oldEnemy: enemiesList)
+        if (enemiesList != null)
         {
-            EnemySim enemySim = oldEnemy.clone();
-            enemySim.setMarioSim(marioSim);
-            e.enemiesListCopy.add(enemySim);
+            for (EnemySim oldEnemy: enemiesList)
+            {
+                EnemySim enemySim = oldEnemy.clone();
+                enemiesListCopy.add(enemySim);
+            }
         }
-        return e;
+        return enemiesListCopy;
     }
 
     public static void setEnemies(float [] enemyObservation, float marioX, float marioY)
@@ -43,28 +44,82 @@ public class Enemy
             enemiesList = new ArrayList<EnemySim>();
         }
         ArrayList<EnemySim> newEnemies = new ArrayList<EnemySim>();
+
         for (int x = 0; x < enemyObservation.length; x+=3)
         {
-            EnemySim sim = Enemy.createEnemy(( marioX + enemyObservation[x+1]), ( marioY + enemyObservation[x+2]), (int) enemyObservation[x] );
+            EnemySim sim = Enemy.createEnemy((marioX + enemyObservation[x+1]), (marioY + enemyObservation[x+2]), (int)enemyObservation[x]);
+            //check for existing enemy
+            boolean foundOne = false;
+            //System.out.println("Actu: Type (" + Enemy.nameEnemy((int)enemyObservation[x])  + "):" + (int)enemyObservation[x] + " X: " + (marioX + enemyObservation[x+1]) + " Y: " + (marioY + enemyObservation[x+2]));
 
-            for (EnemySim s: enemiesList)
+            for (EnemySim e: enemiesList)
             {
-                if (s.compareTo(sim) == 0)
+                //System.out.println("Prev: Type (" + Enemy.nameEnemy(e.getType())  + "):" + e.getType() + " X: "+ e.getX() + " Y: " + e.getY() + " XA: " + e.getXA() + " YA: " + e.getYA() );
+                e.move();
+                //System.out.println("Post: Type (" + Enemy.nameEnemy(e.getType())  + "):" + e.getType() + " X: "+ e.getX() + " Y: " + e.getY() + " XA: " + e.getXA() + " YA: " + e.getYA() );
+                //is it the same kind and close enough?
+                if (e.getType() == sim.getType())
                 {
-                    if (s.getY() != sim.getY() || s.getX() != sim.getX())
+                    float maxDelta = 2.01F * EnemySim.SIDE_WAY_SPEED; //two pixel diff
+
+                    //System.out.println("X Match (Delta): " + (Math.abs(e.getX() - sim.getX()) < maxDelta));
+                    //System.out.println("Y Match (Delta): " + (Math.abs(e.getY() - sim.getY()) < maxDelta));
+                    if ((Math.abs(e.getX() - sim.getX()) < maxDelta) && (Math.abs(e.getY() - sim.getY()) < maxDelta))
                     {
-                        s.setXY(sim.getX(), sim.getY());
+                        //System.out.println("X is off by: " + Math.abs(e.getX() - sim.getX()));
+                        if (Math.abs(e.getX() - sim.getX()) > 0 )
+                        {
+                            e.setFacing(e.getFacing() * -1);
+                            e.setX(sim.getX());
+                            foundOne = true;
+                        }
+
+                        //System.out.println("Exact X match: " + (Math.abs(e.getX() - sim.getX())== 0));
+                        //System.out.println("Y Doesn't match:" + (Math.abs(e.getY() - sim.getY()) != 0));
+                        //System.out.println("Y off by less than 10:" + (Math.abs(e.getY() - sim.getY()) < 10));
+                        //System.out.println("Winged: " +e.isWinged());
+                        if ((Math.abs(e.getX() - sim.getX())== 0) && ((Math.abs(e.getY() - sim.getY()) != 0) || (Math.abs(e.getY() - sim.getY()) < 8)) && e.isWinged())
+                        {
+                            e.setYA((sim.getY() - e.getAccurateY()) *0.95F +0.6F );
+                            e.setY(sim.getY());
+                            foundOne = true;
+                        }
+
+                        //System.out.println("Perfect X match: " +(Math.abs(e.getX() - sim.getX())== 0));
+                        //System.out.println("Y doesn't match: " + (Math.abs(e.getY() - sim.getY()) != 0));
+                        //System.out.println("Y off by less than 2: " +(Math.abs(e.getY() - sim.getY()) <=2));
+                        //System.out.println("Accurate Y set: " + (e.getAccurateY() !=0));
+                        //System.out.println("YA is unknown: " + e.isYAUnknown());
+                        if ((Math.abs(e.getX() - sim.getX())== 0) && (Math.abs(e.getY() - sim.getY()) != 0) && (Math.abs(e.getY() - sim.getY()) <=2) && (e.getAccurateY() !=0) && e.isYAUnknown())
+                        {
+                            e.setYA((sim.getY() - e.getAccurateY()) *0.85F);
+                            e.setY(sim.getY());
+                            e.setKnownYA();
+                            foundOne = true;
+                        }
+                        if ((Math.abs(e.getX() - sim.getX()) == 0 ) && (Math.abs(e.getY() - sim.getY()) == 0))
+                        {
+                            foundOne = true;
+                        }
                     }
-                    sim = s;
                 }
-                else
+
+                if (foundOne)
                 {
-                    sim.drop();
+                    //System.out.println("Updating!");
+                    e.setAccurateY(sim.getY());
+                    newEnemies.add(e);
                 }
             }
-            sim.move();
-            System.out.println("Type: " + sim.getType() + " X Diff:" + (sim.getX() - ( marioX + enemyObservation[x+1])) + " Y Diff: " + (sim.getY() - ( marioY + enemyObservation[x+2])));
-            newEnemies.add(sim);
+            if(!foundOne)
+            {
+                //System.out.println("Adding!");
+                sim.setXA(2);
+                sim.setAccurateY(sim.getY());
+                sim.drop();
+                //sim.move();
+                newEnemies.add(sim);
+            }
         }
         enemiesList = newEnemies;
         //System.out.println("----------------------------------------------------------------------");
@@ -116,27 +171,46 @@ public class Enemy
         }
     }
 
-    public void checkFireballCollide(FireBallSim fireBallSim)
+    public static String nameEnemy(int _type)
     {
-        for (EnemySim e : enemiesListCopy)
-        {
-            e.checkFireballCollide(FireBallSim);
-        }
-    }
+        String enemyName = "Unknown";
 
-    public void checkShellCollide(ShellSim shellSim)
-    {
-        for (EnemySim e: enemiesListCopy)
+        switch (_type)
         {
-            e.checkShellCollide(shellSim);
+            case Sprite.KIND_MARIO:
+                return "Mario";
+            case Sprite.KIND_GOOMBA:
+                return "Goomba";
+            case Sprite.KIND_GOOMBA_WINGED:
+                return "Goomba Winged";
+            case Sprite.KIND_RED_KOOPA:
+                return "Red Koopa";
+            case Sprite.KIND_RED_KOOPA_WINGED:
+                return "Red Koopa Winged";
+            case Sprite.KIND_GREEN_KOOPA:
+                return "Green Koopa";
+            case Sprite.KIND_GREEN_KOOPA_WINGED:
+                return "Green Koopa Winged";
+            case Sprite.KIND_SPIKY:
+                return "Spiky";
+            case Sprite.KIND_SPIKY_WINGED:
+                return "Spiky Winged";
+            case Sprite.KIND_BULLET_BILL:
+                return "Bullet";
+            case Sprite.KIND_ENEMY_FLOWER:
+                return "Flower";
+            case Sprite.KIND_SHELL:
+                return "Shell";
+            case Sprite.KIND_MUSHROOM:
+                return "Mushroom";
+            case Sprite.KIND_FIRE_FLOWER:
+                return "Power up Flower";
+            case Sprite.KIND_GREEN_MUSHROOM:
+                return "Green mushroom";
+            case Sprite.KIND_PRINCESS:
+                return "Princess";
         }
-    }
 
-    public void checkCollide(MarioSim marioSim)
-    {
-        for (EnemySim e:enemiesListCopy)
-        {
-            e.collideCheck();
-        }
+        return enemyName;
     }
 }

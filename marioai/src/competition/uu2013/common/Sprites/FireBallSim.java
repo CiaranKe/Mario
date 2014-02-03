@@ -81,7 +81,8 @@ public class FireBallSim extends EnemySim
 
         xa = facing * sideWaysSpeed;
 
-        Enemy.checkFireballCollide(this);
+        //TODO:
+        //Enemy.checkFireballCollide(this);
 
         if (!move(xa, 0))
         {

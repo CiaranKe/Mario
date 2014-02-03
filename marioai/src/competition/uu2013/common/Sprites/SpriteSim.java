@@ -13,6 +13,8 @@ public abstract class SpriteSim
 {
     public static final float AIR_INERTIA = 0.85F;
     public static final float GROUND_INERTIA = 0.89F;
+    protected static float windCoeff = 0;
+    protected static float iceCoeff = 0;
     protected float x,y,xa,ya;
     protected int facing;
     protected int type;
@@ -39,13 +41,42 @@ public abstract class SpriteSim
 
     public void setXY(float _x, float _y)
     {
-        this.x = _x;
-        this.y = _y;
+
     }
 
     public int getFacing() {
         return facing;
     }
 
-    public abstract SpriteSim clone();
+    public void bumpCheck(int x, int y)
+    {
+
+    }
+
+    public SpriteSim clone()
+    {
+         return this;
+    }
+
+    public void move()
+    {
+
+    }
+
+
+    public void collideCheck()
+    {
+
+    }
+
+    public float iceScale(final float ice)
+    {
+        return ice;
+    }
+
+    public float windScale(final float wind, int facing)
+    {
+        return facing == 1 ? wind : -wind;
+    }
 }
+

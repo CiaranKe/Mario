@@ -15,8 +15,8 @@ public class AStarAgent extends BasicMarioAIAgent implements Agent
     private String name;
     private int jumpCounter;
     private int speedCounter;
-//    LinkedList<Node> openList;
-//    LinkedList<Node> closedList;
+//    LinkedList<PixelNode> openList;
+//    LinkedList<PixelNode> closedList;
     LinkedList<boolean[]> actionList;
 
 
@@ -26,8 +26,8 @@ public class AStarAgent extends BasicMarioAIAgent implements Agent
         super("AStarAgent");
         this.name = "AStarAgent";
         this.action = new boolean[Environment.numberOfKeys];
-//        this.openList = new LinkedList<Node>();
-//        this.closedList = new LinkedList<Node>();
+//        this.openList = new LinkedList<PixelNode>();
+//        this.closedList = new LinkedList<PixelNode>();
         this.actionList = new LinkedList<boolean[]>();
     }
 
@@ -50,7 +50,7 @@ public class AStarAgent extends BasicMarioAIAgent implements Agent
     private void pathFind()
     {
 
-/*        Node startNode = null; // Map.getNodeAt(this.marioFloatPos[0], this.marioFloatPos[1]);
+/*        PixelNode startNode = null; // Map.getNodeAt(this.marioFloatPos[0], this.marioFloatPos[1]);
         openList.add(startNode);
         ArrayList<boolean[]> possibleActions = Action.getPossibleActions(this.isMarioAbleToJump,this.marioFloatPos[0],
                 this.marioFloatPos[1]);
@@ -59,7 +59,7 @@ public class AStarAgent extends BasicMarioAIAgent implements Agent
         {
             float [] nodePosition = Map.getActionCoOrdinates(pAction,this.marioFloatPos[0], this.marioFloatPos[1],
                       this.isMarioAbleToJump,this.isMarioOnGround, this.marioMode);
-            Node temp =  null; //Map.getNodeAt(nodePosition[0], nodePosition[1]);
+            PixelNode temp =  null; //Map.getNodeAt(nodePosition[0], nodePosition[1]);
 
             //calculate vector distance.
             //temp.distance =

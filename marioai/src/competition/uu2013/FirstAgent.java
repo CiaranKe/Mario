@@ -33,13 +33,19 @@ import ch.idsia.benchmark.mario.engine.sprites.Mario;
 import ch.idsia.benchmark.mario.environments.Environment;
 import competition.uu2013.common.Enemy;
 import competition.uu2013.common.Map;
+import competition.uu2013.common.MoveSim;
+import competition.uu2013.common.Sprites.EnemySim;
 import competition.uu2013.common.Sprites.MarioSim;
+
+import java.math.BigDecimal;
 
 public class FirstAgent extends BasicMarioAIAgent implements Agent
 {
 
-    private MarioSim marioSim;
+    private MoveSim ms;
     private int totalKills = 0;
+    private float lastPredX = 32.0F;
+    private float lastPredY = 35.0F;
 
     public FirstAgent()
     {
@@ -50,30 +56,64 @@ public class FirstAgent extends BasicMarioAIAgent implements Agent
     @Override
     public boolean [] getAction()
     {
+        if (this.enemiesFloatPos.length/3 > 2)
+        {
+            throw new UnsupportedOperationException();
+        }
         long startTime = System.currentTimeMillis();
         //--------------------------------------------------------------------------------------------------
-        if (marioSim == null)
+        if (ms == null)
         {
-            marioSim = new MarioSim(marioFloatPos[0],marioFloatPos[1], 0.0F, 0.0F);
-            marioSim.syncLocation(marioFloatPos[0], marioFloatPos[1], isMarioAbleToJump, isMarioOnGround, isMarioAbleToShoot, (marioStatus == 1));
             Map.loadBehaviours();
+            MarioSim marioSim = new MarioSim(marioFloatPos[0],marioFloatPos[1], 0.0F, 0.0F);
+            ms = new MoveSim(marioSim, Enemy.cloneEnemies());
+            ms.syncLocation(marioFloatPos[0], marioFloatPos[1], isMarioAbleToJump, isMarioOnGround, isMarioAbleToShoot, (marioStatus == 1), Enemy.cloneEnemies());
+            Map.isBlocking(13*16,12*16,0,0);
         }
         else
         {
             action[Mario.KEY_SPEED] = action[Mario.KEY_JUMP] = isMarioAbleToJump || !isMarioOnGround;
             action[Mario.KEY_RIGHT] = true;
 
-            //System.out.println("Diff X: " + new BigDecimal(marioFloatPos[0] - marioSim.x ).toPlainString()
-            //        + " Diff Y: " + new BigDecimal(marioFloatPos[1] - marioSim.y ).toPlainString());
-            Map.setScene(this.levelScene, this.marioFloatPos[0], this.marioFloatPos[1]);
+            /*  //TEST MARIO POSITION
+            if (((marioFloatPos[0] - lastPredX ) > 1) || ((marioFloatPos[1] - lastPredY ) > 1))
+            {
+                Map.printMap();
+                System.out.println("Diff X: " + new BigDecimal(marioFloatPos[0] - lastPredX ).toPlainString()
+                        + " Diff Y: " + new BigDecimal(marioFloatPos[1] - lastPredY ).toPlainString());
+                System.out.println("X: Actual: " + marioFloatPos[0] + " Predicted: " + lastPredX + " MAP: " + ((int)marioFloatPos[0]/16 ) );
+                System.out.println("Y: Actual: " + marioFloatPos[1] + " Predicted: " + lastPredY + " MAP: " + ((int)marioFloatPos[1]/16 ) );
+            }
+            */
+
+
+            /*
+            //TEST ENEMY POSITIONS
+            System.out.println("========================================================================================");
+            System.out.println("Enemies: Actual: " + (this.enemiesFloatPos.length/3) + " Sim: " + ms.countEnemies() );
+            System.out.println("----------------------------------------------------------------------------------------");
+
+            for (int x = 0; x < this.enemiesFloatPos.length; x+=3)
+            {
+                System.out.println("A: Type: " + (int)this.enemiesFloatPos[x] + " X: " + (this.marioFloatPos[0] + this.enemiesFloatPos[x+1]) + " Y: " + (this.marioFloatPos[1] + this.enemiesFloatPos[x+2]));
+            }
+            System.out.println("---");
+            for (EnemySim e: Enemy.cloneEnemies())
+            {
+                e.move();
+                System.out.println("P: Type (" + Enemy.nameEnemy(e.getType())  + "):" + e.getType() + " X: "+ e.getX() + " Y: " + e.getY() + " XA: " + e.getXA() + " YA: " + e.getYA() );
+            }
+            System.out.println("========================================================================================");
+            */
+
+
+            Map.setScene(this.mergedObservation, this.marioFloatPos[0], this.marioFloatPos[1]);
             Enemy.setEnemies(this.enemiesFloatPos, this.marioFloatPos[0], this.marioFloatPos[1]);
-            //Map.moveEnemies(3);
-            marioSim.syncLocation(marioFloatPos[0], marioFloatPos[1], isMarioAbleToJump, isMarioOnGround, isMarioAbleToShoot, (marioStatus == 1));
-            marioSim.move(action, marioFloatPos[0], marioFloatPos[1]);
+            ms.syncLocation(marioFloatPos[0], marioFloatPos[1], isMarioAbleToJump, isMarioOnGround, isMarioAbleToShoot, (marioStatus == 1),Enemy.cloneEnemies());
+            ms.move(action,marioFloatPos[0], marioFloatPos[1]);
+            lastPredX = ms.getMarioLocation()[0];
+            lastPredY = ms.getMarioLocation()[1];
         }
-
-
-
         //--------------------------------------------------------------------------------------------------
         //System.out.println("Method Time: " + (System.currentTimeMillis() - startTime));
         return action;

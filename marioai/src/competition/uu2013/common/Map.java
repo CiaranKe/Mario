@@ -19,7 +19,19 @@ public class Map
     public static int levelWidth;
     public static int levelHeight;
     private static byte [][] map;
-    private static byte[] TILE_BEHAVIORS = new byte[256];
+    private static byte [][] data;
+
+    public static byte[] TILE_BEHAVIORS = new byte[256];
+    public static final int BIT_BLOCK_UPPER = 1 << 0;
+    public static final int BIT_BLOCK_ALL = 1 << 1;
+    public static final int BIT_BLOCK_LOWER = 1 << 2;
+    public static final int BIT_SPECIAL = 1 << 3;
+    public static final int BIT_BUMPABLE = 1 << 4;
+    public static final int BIT_BREAKABLE = 1 << 5;
+    public static final int BIT_PICKUPABLE = 1 << 6;
+    public static final int BIT_ANIMATED = 1 << 7;
+
+
 
     public static void setMap(int levelHeight, int levelWidth, MarioAIOptions options)
     {
@@ -27,6 +39,7 @@ public class Map
         Map.levelWidth = levelWidth;
 
         map = new byte[levelWidth][levelHeight];
+        data = new byte[levelWidth][levelHeight];
     }
 
 
@@ -128,6 +141,14 @@ public class Map
 
     public static boolean isBlocking(int x, int y, float xa, float ya)
     {
+
+        byte block = getBlock(x, y);
+        boolean blocking = ((TILE_BEHAVIORS[block & 0xff]) & BIT_BLOCK_ALL) > 0;
+        blocking |= (ya > 0) && ((TILE_BEHAVIORS[block & 0xff]) & BIT_BLOCK_UPPER) > 0;
+        blocking |= (ya < 0) && ((TILE_BEHAVIORS[block & 0xff]) & BIT_BLOCK_LOWER) > 0;
+
+        return blocking;
+        /*
         byte block = getBlock(x,y);
 
         //mario or coin
@@ -140,6 +161,7 @@ public class Map
             return (ya > 0);
         }
         return block != 0;
+        */
     }
 
     public static void loadBehaviours()

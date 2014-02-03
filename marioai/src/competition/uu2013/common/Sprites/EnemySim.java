@@ -2,6 +2,7 @@ package competition.uu2013.common.Sprites;
 
 import ch.idsia.benchmark.mario.engine.sprites.Sprite;
 import competition.uu2013.common.Map;
+import competition.uu2013.common.MoveSim;
 
 /**
  * Created with IntelliJ IDEA.
@@ -13,7 +14,7 @@ import competition.uu2013.common.Map;
 public class EnemySim extends SpriteSim implements Comparable
 {
 
-    private final float SIDE_WAY_SPEED = 1.75f;
+    public static final float SIDE_WAY_SPEED = 1.75f;
     protected float lastX, lastY;
     protected int height;
     protected int width;
@@ -26,11 +27,16 @@ public class EnemySim extends SpriteSim implements Comparable
     protected boolean noFireballDeath;
     protected boolean dead;
     protected MarioSim marioSim;
+    protected MoveSim moveSim;
+    protected float accurateY;
+    protected boolean yaUnknown;
 
     public EnemySim(float _x, float _y, int _type )
     {
         this.x = _x;
         this.y = _y;
+        this.accurateY = 0;
+        this.yaUnknown = true;
         this.type = _type;
         this.deadTime = 0;
         this.dead = false;
@@ -42,6 +48,7 @@ public class EnemySim extends SpriteSim implements Comparable
         this.facing = -1;
         this.seen = false;
         this.noFireballDeath = false;
+        this.accurateY = 0;
 
         switch (this.type)
         {
@@ -82,6 +89,9 @@ public class EnemySim extends SpriteSim implements Comparable
     {
         EnemySim n = new EnemySim(this.x, this.y, this.type);
         n.x = this.x;
+        n.accurateY = this.accurateY;
+        n.yaUnknown = this.yaUnknown;
+        n.moveSim = this.moveSim;
         n.y = this.y;
         n.ya = this.ya;
         n.xa = this.xa;
@@ -99,6 +109,16 @@ public class EnemySim extends SpriteSim implements Comparable
         n.deadTime = this.deadTime;
         n.dead = this.dead;
         return n;
+    }
+
+    public boolean isWinged()
+    {
+        return this.winged;
+    }
+
+    public void setMoveSim(MoveSim _moveSim)
+    {
+        this.moveSim = _moveSim;
     }
 
     public void setMarioSim(MarioSim _marioSim)
@@ -127,6 +147,16 @@ public class EnemySim extends SpriteSim implements Comparable
         }
     }
 
+    public float getXA()
+    {
+        return this.xa;
+    }
+
+    public float getYA()
+    {
+        return this.ya;
+    }
+
     public void setXY(float _x, float _y, float _xa, float _ya)
     {
         this.lastX = this.x;
@@ -147,8 +177,8 @@ public class EnemySim extends SpriteSim implements Comparable
         if (this.winged && !this.seen)
         {
             this.seen = true;
-            this.ya = 0.6F;
-            this.xa = -1.5575F;
+            //this.y -=  10.0F;
+            this.ya = -10.F;
         }
     }
 
@@ -161,7 +191,7 @@ public class EnemySim extends SpriteSim implements Comparable
             if (deadTime == 0)
             {
                 deadTime = 1;
-                return;
+                //spriteContext.removeSprite(this);
             }
 
             if (flyDeath)
@@ -174,32 +204,43 @@ public class EnemySim extends SpriteSim implements Comparable
             return;
         }
 
+        float sideWaysSpeed = 1.75f;
+        //        float sideWaysSpeed = onGround ? 2.5f : 1.2f;
+
         if (xa > 2)
             facing = 1;
         else if (xa < -2)
             facing = -1;
 
-        xa = facing * SIDE_WAY_SPEED;
+        xa = facing * sideWaysSpeed;
+//    xa += facing == 1 ? -wind : wind;
+//        mayJump = (onGround);
+
+
 
         if (!move(xa, 0)) facing = -facing;
         onGround = false;
         move(0, ya);
 
         ya *= winged ? 0.95f : 0.85f;
-        xa *= GROUND_INERTIA;
-
+        if (onGround)
+        {
+            xa *= (GROUND_INERTIA + windScale(windCoeff, facing) + iceScale(iceCoeff));
+        } else
+        {
+            xa *= (AIR_INERTIA + windScale(windCoeff, facing) + iceScale(iceCoeff));
+        }
 
         if (!onGround)
         {
             if (winged)
             {
-                ya += 0.6f * 1;
+                ya += 0.6f * 1.0F;
             } else
             {
-                ya += 2;
+                ya += 2.0F;
             }
-        }
-        else if (winged)
+        } else if (winged)
         {
             ya = -10;
         }
@@ -207,7 +248,6 @@ public class EnemySim extends SpriteSim implements Comparable
 
     public boolean move(float xa, float ya)
     {
-
         while (xa > 8)
         {
             if (!move(8, 0)) return false;
@@ -287,10 +327,8 @@ public class EnemySim extends SpriteSim implements Comparable
                 onGround = true;
             }
             return false;
-        }
-        else
+        } else
         {
-
             x += xa;
             y += ya;
             return true;
@@ -301,12 +339,13 @@ public class EnemySim extends SpriteSim implements Comparable
     {
         int x = (int) (_x / 16);
         int y = (int) (_y / 16);
-        if (x == (int) (this.x / 16) && y == (int) (this.y / 16))
-        {
-            return false;
-        }
+        if (x == (int) (this.x / 16) && y == (int) (this.y / 16)) return false;
 
-        return Map.isBlocking(x, y, xa, ya);
+        boolean blocking = Map.isBlocking(x, y, xa, ya);
+
+//        byte block = levelScene.level.getBlock(x, y);
+
+        return blocking;
     }
 
     public int compareTo(Object o)
@@ -358,7 +397,7 @@ public class EnemySim extends SpriteSim implements Comparable
         }
     }
 
-    public final boolean spiky()
+    public final boolean canKill()
     {
         switch (type)
         {
@@ -384,7 +423,7 @@ public class EnemySim extends SpriteSim implements Comparable
 
         if (xMarioD > -width*2-4 && xMarioD < width*2+4) {
             if (yMarioD > -height && yMarioD < marioSim.height()) {
-                if (!spiky() && marioSim.getYa() > 0 && yMarioD <= 0 && (!marioSim.isOnGround() || !!marioSim.wasOnGround()))
+                if (!canKill() && marioSim.getYa() > 0 && yMarioD <= 0 && (!marioSim.isOnGround() || !!marioSim.wasOnGround()))
                 {
                     marioSim.stomp(this);
                 }
@@ -425,5 +464,103 @@ public class EnemySim extends SpriteSim implements Comparable
             }
         }
         return false;
+    }
+
+    public void checkShellCollide(ShellSim shell)
+    {
+        if (deadTime != 0)
+        {
+            return;
+        }
+
+        float xD = shell.x - x;
+        float yD = shell.y - y;
+
+        if (xD > -16 && xD < 16)
+        {
+            if (yD > -height && yD < shell.height)
+            {
+                xa = shell.facing * 2;
+                ya = -5;
+                flyDeath = true;
+                deadTime = 100;
+                winged = false;
+            }
+        }
+    }
+
+    public boolean checkFireballCollide(FireBallSim fireBallSim)
+    {
+        if (deadTime != 0)
+        {
+            return false;
+        }
+
+        float xD = fireBallSim.x - x;
+        float yD = fireBallSim.y - y;
+
+        if (xD > -16 && xD < 16)
+        {
+            if (yD > -height && yD < fireBallSim.height)
+            {
+                if (noFireballDeath)
+                {
+                    return false;
+                }
+
+                xa = fireBallSim.facing * 2;
+                ya = -5;
+                flyDeath = true;
+                deadTime = 100;
+                winged = false;
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public void setFacing(int _facing)
+    {
+        this.facing = _facing;
+    }
+
+    public void setX(float _x)
+    {
+        this.x = _x;
+    }
+
+    public void setYA(float _ya)
+    {
+        this.ya = _ya;
+    }
+
+    public void setY(float _y)
+    {
+        this.y = _y;
+    }
+
+    public float getAccurateY()
+    {
+        return accurateY;
+    }
+
+    public boolean isYAUnknown()
+    {
+        return yaUnknown;
+    }
+
+    public void setKnownYA()
+    {
+        this.yaUnknown = false;
+    }
+
+    public void setAccurateY(float _accurateY)
+    {
+        this.accurateY = _accurateY;
+    }
+
+    public void setXA(int _xa)
+    {
+        this.xa = _xa;
     }
 }
