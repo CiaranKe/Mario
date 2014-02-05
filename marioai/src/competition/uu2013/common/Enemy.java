@@ -37,7 +37,21 @@ public class Enemy
         return enemiesListCopy;
     }
 
-    public static void setEnemies(float [] enemyObservation, float marioX, float marioY)
+    public static boolean withinScope(float marioX, float marioY, int halfSceneWidth, int halfSceneHeight, EnemySim sim)
+    {
+        float lookAHead = marioX + (halfSceneWidth * 16);
+        float lookBelow = marioY + (halfSceneHeight * 16);
+        float lookBehind = marioX - (halfSceneWidth * 16);
+        float lookAbove = marioY - (halfSceneHeight * 16);
+
+        if ((sim.getX() < lookAHead) && (sim.getY() < lookBelow) && (sim.getX() > lookBehind) && (sim.getY() > lookAbove))
+        {
+            return true;
+        }
+        return false;
+    }
+
+    public static void setEnemies(float [] enemyObservation, float marioX, float marioY, int halfSceneWidth, int halfSceneHeight)
     {
         if (enemiesList == null)
         {
@@ -45,25 +59,131 @@ public class Enemy
         }
         ArrayList<EnemySim> newEnemies = new ArrayList<EnemySim>();
 
+        //System.out.println("lookAHead: " + lookAHead + " lookBelow: " + lookBelow);
+        /*
+
+
+        if (!winged)
+        {
+	        xa = (lastX - x) *0.89F;
+	        if ((lastY - y) > 0)
+	        {
+		        ya = lastY - y) * 0.85F +2;
+	        }
+	        else
+	        {
+		        ya = lastYA * 0.85F;
+	        }
+        }
+        else
+        {
+	        ya = (y - lastY) *0.89F + 0.6F;
+        }
+        */
+
         for (int x = 0; x < enemyObservation.length; x+=3)
         {
             EnemySim sim = Enemy.createEnemy((marioX + enemyObservation[x+1]), (marioY + enemyObservation[x+2]), (int)enemyObservation[x]);
             //check for existing enemy
             boolean foundOne = false;
-            //System.out.println("Actu: Type (" + Enemy.nameEnemy((int)enemyObservation[x])  + "):" + (int)enemyObservation[x] + " X: " + (marioX + enemyObservation[x+1]) + " Y: " + (marioY + enemyObservation[x+2]));
+            System.out.println("Actu: Type (" + Enemy.nameEnemy((int)enemyObservation[x])  + "):" + (int)enemyObservation[x] + " X: " + (marioX + enemyObservation[x+1]) + " Y: " + (marioY + enemyObservation[x+2]));
 
-            for (EnemySim e: enemiesList)
+            //We can't see the map outside the fieldwith, so can't model enemy behaviour
+            if (Enemy.withinScope(marioX, marioY,halfSceneWidth,halfSceneHeight,sim))
             {
-                //System.out.println("Prev: Type (" + Enemy.nameEnemy(e.getType())  + "):" + e.getType() + " X: "+ e.getX() + " Y: " + e.getY() + " XA: " + e.getXA() + " YA: " + e.getYA() );
+                for (EnemySim e: enemiesList)
+                {
+                    //check the types match
+                    if (e.getType() == sim.getType())
+                    {
+                        //update the sim position
+                        //System.out.println("Prev: Type (" + Enemy.nameEnemy(e.getType())  + "):" + e.getType() + " X: "+ e.getX() + " Y: " + e.getY() + " XA: " + e.getXA() + " YA: " + e.getYA()  +" Facing" + e.getFacing());
+                        e.move();
+                        //System.out.println("Post: Type (" + Enemy.nameEnemy(e.getType()) + "):" + e.getType() + " X: " + e.getX() + " Y: " + e.getY() + " XA: " + e.getXA() + " YA: " + e.getYA()+" Facing" + e.getFacing());
+                        //System.out.println("Type Match!");
+                        float maxDelta = 2.01F * EnemySim.SIDE_WAY_SPEED; //two pixel diff
+
+                        //is the enemy close enough?
+                        if ((Math.abs(e.getX() - sim.getX()) < maxDelta) && (Math.abs(e.getY() - sim.getY()) < maxDelta))
+                        {
+                            //System.out.println("XY inside range");
+                            //x position is off
+                            if (Math.abs(e.getX() - sim.getX()) > 0)
+                            {
+                                //System.out.println("X is off");
+                                e.setFacing(e.getFacing() * -1);
+                                e.setXA((e.getAccurateX() - sim.getX()) * 0.89F);
+                                e.setFacing((e.getAccurateX() - sim.getX()) * 0.89F > 0 ? 1 : -1);
+                                e.setX(sim.getX());
+                                foundOne = true;
+                            }
+                            //Y off by less than 8 and winged;
+                            if ((Math.abs(e.getY() - sim.getY()) < 8) && e.isWinged())
+                            {
+                                //System.out.println("Winged");
+                                e.setYA((sim.getY() - e.getAccurateY()) *0.95F +0.6F );
+                                e.setY(sim.getY());
+                                foundOne = true;
+                            }
+                            //not a winged creature
+                            if ((Math.abs(e.getY() - sim.getY()) <=2) && (Math.abs(e.getY() - sim.getY()) !=0))
+                            {
+                                //System.out.println("Y off, <2");
+                                if (Math.abs(e.getAccurateY() - sim.getY()) > 0)
+                                {
+                                    //System.out.println("Y Accurate off");
+                                    e.setYA((e.getAccurateY() - sim.getY()) * 0.85F + 2);
+                                    e.setY(sim.getY());
+                                }
+                                else
+                                {
+                                    //System.out.println("Updating YA");
+                                    e.setYA(e.getYA() * 0.85F);
+                                    e.setY(sim.getY());
+                                }
+                                foundOne = true;
+                            }
+                            if ((Math.abs(e.getX() - sim.getX()) == 0) && (Math.abs(e.getY() - sim.getY()) == 0))
+                            {
+                                foundOne = true;
+                            }
+                        }
+                    }
+                    if (foundOne)
+                    {
+                        //System.out.println("Updating!");
+                        e.setAccurateY(sim.getY());
+                        e.setAccurateX(sim.getX());
+                        newEnemies.add(e);
+                        break;
+                    }
+                }
+                if(!foundOne)
+                {
+                    //System.out.println("Adding!");
+                    sim.setXA(2);
+                    sim.setAccurateY(sim.getY());
+                    sim.setAccurateX(sim.getX());
+                    sim.drop();
+                    newEnemies.add(sim);
+                }
+            }
+            else
+            {
+                //System.out.println("Can't model yet!");
+            }
+
+            /*
+            for (EnemySim e: enemiesList)
+                {
                 e.move();
-                //System.out.println("Post: Type (" + Enemy.nameEnemy(e.getType())  + "):" + e.getType() + " X: "+ e.getX() + " Y: " + e.getY() + " XA: " + e.getXA() + " YA: " + e.getYA() );
-                //is it the same kind and close enough?
+                System.out.println("Post: Type (" + Enemy.nameEnemy(e.getType())  + "):" + e.getType() + " X: "+ e.getX() + " Y: " + e.getY() + " XA: " + e.getXA() + " YA: " + e.getYA() );
                 if (e.getType() == sim.getType())
                 {
                     float maxDelta = 2.01F * EnemySim.SIDE_WAY_SPEED; //two pixel diff
 
-                    //System.out.println("X Match (Delta): " + (Math.abs(e.getX() - sim.getX()) < maxDelta));
-                    //System.out.println("Y Match (Delta): " + (Math.abs(e.getY() - sim.getY()) < maxDelta));
+                    System.out.println("X Match (Delta): " + (Math.abs(e.getX() - sim.getX()) < maxDelta));
+                    System.out.println("Y Match (Delta): " + (Math.abs(e.getY() - sim.getY()) < maxDelta));
                     if ((Math.abs(e.getX() - sim.getX()) < maxDelta) && (Math.abs(e.getY() - sim.getY()) < maxDelta))
                     {
                         //System.out.println("X is off by: " + Math.abs(e.getX() - sim.getX()));
@@ -92,7 +212,18 @@ public class Enemy
                         //System.out.println("YA is unknown: " + e.isYAUnknown());
                         if ((Math.abs(e.getX() - sim.getX())== 0) && (Math.abs(e.getY() - sim.getY()) != 0) && (Math.abs(e.getY() - sim.getY()) <=2) && (e.getAccurateY() !=0) && e.isYAUnknown())
                         {
-                            e.setYA((sim.getY() - e.getAccurateY()) *0.85F);
+                            float newYA;
+
+                            if (sim.getY() - e.getAccurateY() > 0)
+                            {
+                                newYA = (sim.getY() - e.getAccurateY()) * 0.89F + 2;
+                            }
+                            else
+                            {
+                                newYA = e.getYA() * 0.85F;
+                            }
+
+                            e.setYA(newYA);
                             e.setY(sim.getY());
                             e.setKnownYA();
                             foundOne = true;
@@ -106,23 +237,33 @@ public class Enemy
 
                 if (foundOne)
                 {
-                    //System.out.println("Updating!");
+                    // XA = (X - lastX) * 0.89F
+                    System.out.println("Updating!");
                     e.setAccurateY(sim.getY());
+                    e.setAccurateX(sim.getX());
                     newEnemies.add(e);
                 }
             }
             if(!foundOne)
             {
-                //System.out.println("Adding!");
+                System.out.println("Adding!");
                 sim.setXA(2);
                 sim.setAccurateY(sim.getY());
+                sim.setAccurateX(sim.getX());
                 sim.drop();
                 //sim.move();
                 newEnemies.add(sim);
             }
+
+             */
+
         }
         enemiesList = newEnemies;
         //System.out.println("----------------------------------------------------------------------");
+    }
+
+    public static int getCount() {
+        return Enemy.enemiesList.size();
     }
 
 

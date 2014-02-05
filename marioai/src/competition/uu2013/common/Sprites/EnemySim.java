@@ -29,18 +29,21 @@ public class EnemySim extends SpriteSim implements Comparable
     protected MarioSim marioSim;
     protected MoveSim moveSim;
     protected float accurateY;
+    protected float accurateX;
     protected boolean yaUnknown;
+    protected boolean firstMove;
 
     public EnemySim(float _x, float _y, int _type )
     {
         this.x = _x;
         this.y = _y;
+        this.firstMove = true;
         this.accurateY = 0;
+        this.accurateX = 0;
         this.yaUnknown = true;
         this.type = _type;
         this.deadTime = 0;
         this.dead = false;
-        this.onGround = false;
         this.flyDeath = false;
         this.avoidCliffs = false;
         this.width = 4;
@@ -82,7 +85,6 @@ public class EnemySim extends SpriteSim implements Comparable
                 this.winged = true;
                 break;
         }
-
     }
 
     public EnemySim clone()
@@ -90,6 +92,7 @@ public class EnemySim extends SpriteSim implements Comparable
         EnemySim n = new EnemySim(this.x, this.y, this.type);
         n.x = this.x;
         n.accurateY = this.accurateY;
+        n.accurateX = this.accurateX;
         n.yaUnknown = this.yaUnknown;
         n.moveSim = this.moveSim;
         n.y = this.y;
@@ -180,10 +183,22 @@ public class EnemySim extends SpriteSim implements Comparable
             //this.y -=  10.0F;
             this.ya = -10.F;
         }
+        else if (!this.winged && !this.seen)
+        {
+            this.seen = true;
+            this.xa = -1.5575F;
+            this.ya = 1.7F;
+            this.onGround = true;
+
+        }
     }
 
     public void move()
     {
+        if (xa == -1.5575F && ya == 1.7F)
+        {
+            System.out.println();
+        }
         if (deadTime > 0)
         {
             deadTime--;
@@ -222,6 +237,8 @@ public class EnemySim extends SpriteSim implements Comparable
         onGround = false;
         move(0, ya);
 
+
+
         ya *= winged ? 0.95f : 0.85f;
         if (onGround)
         {
@@ -244,6 +261,7 @@ public class EnemySim extends SpriteSim implements Comparable
         {
             ya = -10;
         }
+        //System.out.println("Sim\t: X:\t"+x + " XA:\t" +xa + " Y:\t" +y + " YA:\t" + ya + " OnGround: " + onGround);
     }
 
     public boolean move(float xa, float ya)
@@ -559,8 +577,18 @@ public class EnemySim extends SpriteSim implements Comparable
         this.accurateY = _accurateY;
     }
 
-    public void setXA(int _xa)
+    public void setXA(float _xa)
     {
         this.xa = _xa;
+    }
+
+    public void setAccurateX(float _accurateX)
+    {
+        this.accurateX = _accurateX;
+    }
+
+    public float getAccurateX()
+    {
+        return accurateX;
     }
 }
