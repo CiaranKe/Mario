@@ -2,6 +2,7 @@ package ch.idsia.gui;
 
 import ch.idsia.benchmark.tasks.BasicTask;
 import ch.idsia.tools.MarioAIOptions;
+import competition.uu2013.prototypes.LearningAgent;
 
 /**
  * Created with IntelliJ IDEA.
@@ -18,7 +19,7 @@ public class GUIScenario
         //newOptions.setFrozenCreatures(true);
         //newOptions.setEnemies("");
         final BasicTask basicTask = new BasicTask(newOptions);
-        basicTask.doEpisodes(iterations,true,1);
+        basicTask.doEpisodes(iterations,true,iterations);
         try
         {
             System.out.println(basicTask.getEvaluationInfo().toString());

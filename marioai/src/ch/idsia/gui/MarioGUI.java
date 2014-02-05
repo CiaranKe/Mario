@@ -163,7 +163,7 @@ public class MarioGUI extends Component
         this.iterationsSpinner = new JSpinner(new SpinnerNumberModel(1,1,Integer.MAX_VALUE,1));
 
         //lists
-        this.agentList = new JList(new String[] {"SimpleAgent","JumpingAgent", "AStarAgent", "FirstAgent", "HumanKeyboardAgent", "robinbaumgarten.AStarAgent"});
+        this.agentList = new JList(new String[] {"prototypes.LearningAgent","prototypes.StatefulAgent","prototypes.PixelAgent", "AStarAgent", "FirstAgent"});
 
         this.runButton = new JButton();
 
@@ -435,65 +435,25 @@ public class MarioGUI extends Component
         this.fieldHeightSpinner.addChangeListener(new ChangeListener() {
             @Override
             public void stateChanged(ChangeEvent e) {
-                int value = (Integer)((JSpinner) e.getSource()).getValue();
-                int maxValue = (Integer)MarioGUI.this.levelHeightSpinner.getValue();
-
-                if (value > maxValue)
-                {
-                    ((JSpinner) e.getSource()).setValue(new Integer(maxValue));
-                    value = maxValue;
-                }
-                MarioGUI.this.options.setReceptiveFieldHeight(value);
+                MarioGUI.this.options.setReceptiveFieldHeight((Integer)((JSpinner) e.getSource()).getValue());
             }
         });
         this.fieldWidthSpinner.addChangeListener(new ChangeListener() {
             @Override
             public void stateChanged(ChangeEvent e) {
-                int value = (Integer)((JSpinner) e.getSource()).getValue();
-                int maxValue = (Integer)MarioGUI.this.levelLengthSpinner.getValue();
-
-                if (value > maxValue)
-                {
-                    ((JSpinner) e.getSource()).setValue(new Integer(maxValue));
-                    value = maxValue;
-                }
-                MarioGUI.this.options.setReceptiveFieldWidth(value);
+                MarioGUI.this.options.setReceptiveFieldWidth((Integer)((JSpinner) e.getSource()).getValue());
             }
         });
         this.levelHeightSpinner.addChangeListener(new ChangeListener() {
             @Override
             public void stateChanged(ChangeEvent e) {
-                int value = (Integer)((JSpinner) e.getSource()).getValue();
-                int fieldValue = (Integer) MarioGUI.this.fieldHeightSpinner.getValue();
-
-                if (value < fieldValue)
-                {
-                    fieldValue = value;
-                    if (fieldValue % 2 == 0)
-                    {
-                        fieldValue--;
-                    }
-                    MarioGUI.this.fieldHeightSpinner.setValue(fieldValue);
-                }
-                MarioGUI.this.options.setLevelHeight(value);
+                MarioGUI.this.options.setLevelHeight((Integer)((JSpinner) e.getSource()).getValue());
             }
         });
         this.levelLengthSpinner.addChangeListener(new ChangeListener() {
             @Override
             public void stateChanged(ChangeEvent e) {
-                int value = (Integer)((JSpinner) e.getSource()).getValue();
-                int fieldValue = (Integer) MarioGUI.this.fieldWidthSpinner.getValue();
-
-                if (value < fieldValue)
-                {
-                    fieldValue = value;
-                    if (fieldValue % 2 == 0)
-                    {
-                        fieldValue--;
-                    }
-                    MarioGUI.this.fieldWidthSpinner.setValue(fieldValue);
-                }
-                MarioGUI.this.options.setLevelLength(value);
+                MarioGUI.this.options.setLevelLength((Integer)((JSpinner) e.getSource()).getValue());
             }
         });
         this.fpsSpinner.addChangeListener(new ChangeListener() {
