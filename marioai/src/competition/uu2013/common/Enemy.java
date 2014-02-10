@@ -166,6 +166,174 @@ public class Enemy
         }
         enemiesList = newSprites;
         return requireReplanning;
+
+        /*
+        EnemySim sim = this.createEnemy((marioX + enemyObservation[x+1]), (marioY + enemyObservation[x+2]), (int)enemyObservation[x]);
+            //check for existing enemy
+            boolean foundOne = false;
+            System.out.println("Actu: Type (" + this.nameEnemy((int)enemyObservation[x])  + "):" + (int)enemyObservation[x] + " X: " + (marioX + enemyObservation[x+1]) + " Y: " + (marioY + enemyObservation[x+2]));
+
+            for (EnemySim e: enemiesList)
+            {
+                //check the types match
+                if (e.getType() == sim.getType())
+                {
+                    //update the sim position
+                    System.out.println("Sim: Type (" + Enemy.nameEnemy(e.getType())  + "):" + e.getType() + " X: "+ e.getX() + " Y: " + e.getY() + " XA: " + e.getXA() + " YA: " + e.getYA()  +" Facing" + e.getFacing());
+                    float maxDelta = 2.01F * EnemySim.SIDE_WAY_SPEED; //two pixel diff
+
+                    //is the enemy close enough?
+                    if ((Math.abs(e.getX() - sim.getX()) == 0) && (Math.abs(e.getY() - sim.getY()) == 0))
+                    {
+                        System.out.println("Exact Match");
+                        foundOne = true;
+                    }
+
+                    else if ((Math.abs(e.getX() - sim.getX()) < maxDelta) && (Math.abs(e.getY() - sim.getY()) < maxDelta))
+                    {
+                        System.out.println("XY inside range");
+                        //x position is off
+                        if (Math.abs(e.getX() - sim.getX()) > 0)
+                        {
+                            System.out.println("X is off");
+                            e.setFacing(e.getFacing() * -1);
+                            e.setXA((e.getAccurateX() - sim.getX()) * 0.89F);
+                            e.setFacing((e.getAccurateX() - sim.getX()) * 0.89F > 0 ? 1 : -1);
+                            e.setX(sim.getX());
+                            foundOne = true;
+                        }
+                        //Y off by less than 8 and winged;
+                        if ((Math.abs(e.getY() - sim.getY()) < 8) && e.isWinged())
+                        {
+                            System.out.println("Winged");
+                            e.setYA((sim.getY() - e.getAccurateY()) *0.95F +0.6F );
+                            e.setY(sim.getY());
+                            foundOne = true;
+                        }
+                        //not a winged creature
+                        if ((Math.abs(e.getY() - sim.getY()) <=2) && (Math.abs(e.getY() - sim.getY()) !=0))
+                        {
+                            System.out.println("Y off, <2");
+                            if (Math.abs(e.getAccurateY() - sim.getY()) > 0)
+                            {
+                                System.out.println("Y Accurate off");
+                                e.setYA((e.getAccurateY() - sim.getY()) * 0.85F + 2);
+                                e.setY(sim.getY());
+                            }
+                            else
+                            {
+                                System.out.println("Updating YA");
+                                e.setYA(e.getYA() * 0.85F);
+                                e.setY(sim.getY());
+                            }
+                            foundOne = true;
+                        }
+
+                    }
+                }
+                if (foundOne)
+                {
+                    System.out.println("Updating!");
+                    e.setAccurateY(sim.getY());
+                    e.setAccurateX(sim.getX());
+                    newEnemies.add(e);
+                    break;
+                }
+            }
+            if(!foundOne)
+            {
+                System.out.println("Adding!");
+                sim.setXA(2);
+                sim.setAccurateY(sim.getY());
+                sim.setAccurateX(sim.getX());
+                sim.drop();
+                newEnemies.add(sim);
+            }
+            */
+
+            /*
+            for (EnemySim e: enemiesList)
+                {
+                e.move();
+                System.out.println("Post: Type (" + Enemy.nameEnemy(e.getType())  + "):" + e.getType() + " X: "+ e.getX() + " Y: " + e.getY() + " XA: " + e.getXA() + " YA: " + e.getYA() );
+                if (e.getType() == sim.getType())
+                {
+                    float maxDelta = 2.01F * EnemySim.SIDE_WAY_SPEED; //two pixel diff
+
+                    System.out.println("X Match (Delta): " + (Math.abs(e.getX() - sim.getX()) < maxDelta));
+                    System.out.println("Y Match (Delta): " + (Math.abs(e.getY() - sim.getY()) < maxDelta));
+                    if ((Math.abs(e.getX() - sim.getX()) < maxDelta) && (Math.abs(e.getY() - sim.getY()) < maxDelta))
+                    {
+                        //System.out.println("X is off by: " + Math.abs(e.getX() - sim.getX()));
+                        if (Math.abs(e.getX() - sim.getX()) > 0 )
+                        {
+                            e.setFacing(e.getFacing() * -1);
+                            e.setX(sim.getX());
+                            foundOne = true;
+                        }
+
+                        //System.out.println("Exact X match: " + (Math.abs(e.getX() - sim.getX())== 0));
+                        //System.out.println("Y Doesn't match:" + (Math.abs(e.getY() - sim.getY()) != 0));
+                        //System.out.println("Y off by less than 10:" + (Math.abs(e.getY() - sim.getY()) < 10));
+                        //System.out.println("Winged: " +e.isWinged());
+                        if ((Math.abs(e.getX() - sim.getX())== 0) && ((Math.abs(e.getY() - sim.getY()) != 0) || (Math.abs(e.getY() - sim.getY()) < 8)) && e.isWinged())
+                        {
+                            e.setYA((sim.getY() - e.getAccurateY()) *0.95F +0.6F );
+                            e.setY(sim.getY());
+                            foundOne = true;
+                        }
+
+                        //System.out.println("Perfect X match: " +(Math.abs(e.getX() - sim.getX())== 0));
+                        //System.out.println("Y doesn't match: " + (Math.abs(e.getY() - sim.getY()) != 0));
+                        //System.out.println("Y off by less than 2: " +(Math.abs(e.getY() - sim.getY()) <=2));
+                        //System.out.println("Accurate Y set: " + (e.getAccurateY() !=0));
+                        //System.out.println("YA is unknown: " + e.isYAUnknown());
+                        if ((Math.abs(e.getX() - sim.getX())== 0) && (Math.abs(e.getY() - sim.getY()) != 0) && (Math.abs(e.getY() - sim.getY()) <=2) && (e.getAccurateY() !=0) && e.isYAUnknown())
+                        {
+                            float newYA;
+
+                            if (sim.getY() - e.getAccurateY() > 0)
+                            {
+                                newYA = (sim.getY() - e.getAccurateY()) * 0.89F + 2;
+                            }
+                            else
+                            {
+                                newYA = e.getYA() * 0.85F;
+                            }
+
+                            e.setYA(newYA);
+                            e.setY(sim.getY());
+                            e.setKnownYA();
+                            foundOne = true;
+                        }
+                        if ((Math.abs(e.getX() - sim.getX()) == 0 ) && (Math.abs(e.getY() - sim.getY()) == 0))
+                        {
+                            foundOne = true;
+                        }
+                    }
+                }
+
+                if (foundOne)
+                {
+                    // XA = (X - lastX) * 0.89F
+                    System.out.println("Updating!");
+                    e.setAccurateY(sim.getY());
+                    e.setAccurateX(sim.getX());
+                    newEnemies.add(e);
+                }
+            }
+            if(!foundOne)
+            {
+                System.out.println("Adding!");
+                sim.setXA(2);
+                sim.setAccurateY(sim.getY());
+                sim.setAccurateX(sim.getX());
+                sim.drop();
+                //sim.move();
+                newEnemies.add(sim);
+            }
+
+             */
     }
 
     public int getCount() {
