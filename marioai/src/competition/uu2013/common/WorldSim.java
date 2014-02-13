@@ -11,11 +11,8 @@ public class WorldSim implements Cloneable
     MarioSim marioSim;
     Enemy enemySims;
     Map mapSim;
+    private ArrayList<FireBallSim> fireBallSims;
 
-    public WorldSim()
-    {
-
-    }
 
     public WorldSim(MarioSim _marioSim, Enemy _enemySims, Map _mapSim)
     {
@@ -23,6 +20,7 @@ public class WorldSim implements Cloneable
         this.enemySims = _enemySims;
         this.mapSim= _mapSim;
         this.marioSim.setWorldSim(this);
+        this.fireBallSims = new ArrayList<FireBallSim>();
     }
 
     public ArrayList<SpriteSim> getEnemySims()
@@ -41,10 +39,12 @@ public class WorldSim implements Cloneable
         ArrayList<SpriteSim> allSims = new ArrayList<SpriteSim>();
 
         allSims.add(marioSim);
+        allSims.addAll(fireBallSims);
         allSims.addAll(enemySims.getEnemiesList());
 
 
         marioSim.setKeys(_keys, cuurentX, currentY);
+
         for (SpriteSim e: allSims)
         {
             e.move();
@@ -66,6 +66,7 @@ public class WorldSim implements Cloneable
                 if (this.checkFireballCollide((FireBallSim)e, allSims))
                 {
                     ((FireBallSim) e).die();
+                    fireBallSims.remove(e);
                 }
             }
         }
@@ -143,5 +144,34 @@ public class WorldSim implements Cloneable
             ((EnemySim)sim).setWorldSim(this);
         }
 
+    }
+
+    public Object getMarioXA() {
+        return marioSim.getXA();
+    }
+
+    public Object getMarioYA() {
+        return marioSim.getYa();
+    }
+
+    public boolean getOnGround() {
+        return marioSim.isOnGround();
+    }
+
+    public boolean getWasOnGround() {
+        return marioSim.wasOnGround();
+    }
+
+    public int numFireBalls()
+    {
+        return this.fireBallSims.size();
+    }
+
+    public void addFireball(FireBallSim fireBallSim)
+    {
+        fireBallSim.setWorldSim(this);
+        fireBallSim.setMarioSim(this.marioSim);
+        this.fireBallSims.add(fireBallSim);
+        fireBallSim.move();
     }
 }

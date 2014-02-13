@@ -1,5 +1,8 @@
 package competition.uu2013.common.Sprites;
 
+import ch.idsia.benchmark.mario.engine.GlobalOptions;
+import ch.idsia.benchmark.mario.engine.sprites.Mario;
+import ch.idsia.benchmark.mario.engine.sprites.Sprite;
 import ch.idsia.benchmark.mario.environments.Environment;
 import competition.uu2013.common.Map;
 import competition.uu2013.common.WorldSim;
@@ -24,6 +27,13 @@ public class MarioSim  extends SpriteSim
     private boolean keys[];
     private WorldSim worldSim;
     public EnemySim carried;
+    private float oldX;
+    private float oldY;
+    private float oldYa;
+    private boolean oldWasOnGround;
+    private boolean oldIsOnGround;
+    private Mario marioActual;
+    private boolean ableToShoot = true;
 
 
     public static final int KEY_LEFT = 0;
@@ -42,33 +52,12 @@ public class MarioSim  extends SpriteSim
         xa = _xa;
         ya = _ya;
         keys_last = new boolean[Environment.numberOfKeys];
+        this.marioActual = GlobalOptions.mario;
     }
 
     public MarioSim clone()
     {
         MarioSim m = new MarioSim(this.x, this.y, this.xa, this.ya);
-
-        m.carried = this.carried;
-        m.worldSim = this.worldSim;
-        m.big = this.big;
-        m.fire = this.fire;
-        m.invulnerableTime = this.invulnerableTime;
-        m.jumpTime = this.jumpTime;
-        m.facing = this.facing;
-        m.onGround = this.onGround;
-        m.wasOnGround = this.onGround;
-        m.mayJump = this.mayJump;
-        m.sliding = this.sliding;
-        m.dead = this.dead;
-        m.xJumpSpeed = this.xJumpSpeed;
-        m.yJumpSpeed = this.yJumpSpeed;
-        m.keys_last[KEY_LEFT] = this.keys_last[KEY_LEFT];
-        m.keys_last[KEY_RIGHT] = this.keys_last[KEY_RIGHT];
-        m.keys_last[KEY_DOWN] = this.keys_last[KEY_DOWN];
-        m.keys_last[KEY_JUMP] = this.keys_last[KEY_JUMP];
-        m.keys_last[KEY_SPEED] = this.keys_last[KEY_SPEED];
-        m.keys_last[KEY_UP] = this.keys_last[KEY_UP];
-
         return m;
     }
 
@@ -110,6 +99,11 @@ public class MarioSim  extends SpriteSim
         keys_last = keys;
         boolean ducking = false;
         float sideWaysSpeed = keys[KEY_SPEED]  ? 1.2f : 0.6f;
+        this.oldX = x;
+        this.oldY = y;
+        this.oldYa = this.ya;
+        this.oldWasOnGround = wasOnGround;
+        this.oldIsOnGround = onGround;
 
         if (xa > 2)
         {
@@ -177,6 +171,12 @@ public class MarioSim  extends SpriteSim
         }
 
 
+        if (keys[KEY_SPEED] && ableToShoot && this.fire && worldSim.numFireBalls() < 2)
+        {
+            worldSim.addFireball(new FireBallSim(x + facing * 6, y - 20, Sprite.KIND_FIREBALL , facing));
+        }
+
+        ableToShoot = (worldSim.numFireBalls() < 2);
 
         mayJump = (onGround || sliding) && !keys[KEY_JUMP];
 
@@ -208,10 +208,6 @@ public class MarioSim  extends SpriteSim
         {
             ya += 3;
         }
-
-
-
-        //System.out.println("move: (xa,ya)5 = " + xa + "," + ya);
     }
 
     private boolean move(float xa, float ya)
@@ -306,7 +302,7 @@ public class MarioSim  extends SpriteSim
         int x = (int) (_x / 16); // block's quantized pos
         int y = (int) (_y / 16);
 
-        int Mx = (int) (this.x / 16); // mario's quantized pos
+        int Mx = (int) (this.x / 16); // reddit's quantized pos
         int My = (int) (this.y / 16);
         if (x == Mx && y == My) return false;
 
@@ -336,6 +332,7 @@ public class MarioSim  extends SpriteSim
     {
         System.out.println(" PREDICTED STOMP!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
         System.out.println("T: " + enemy.type + " X: " + enemy.x + " Y: " + enemy.y + "Height: " + enemy.height());
+
         float targetY = enemy.y - enemy.height() / 2;
         move(0, targetY - y);
 
@@ -398,6 +395,7 @@ public class MarioSim  extends SpriteSim
         }
 
         this.mayJump = _mayJump;
+        wasOnGround = onGround;
         this.onGround = _onGround;
         this.big = _big;
         this.fire = _fire;
@@ -430,5 +428,31 @@ public class MarioSim  extends SpriteSim
         keys = _keys;
         lastX = accurateX;
         lastY = accurateY;
+    }
+
+    public float getOldX() {
+        return oldX;
+    }
+
+    public float getOldY() {
+        return oldY;
+    }
+
+    public float getOldYa() {
+        return oldYa;
+    }
+
+    public boolean oldWasOnGround()
+    {
+        return this.oldWasOnGround;
+    }
+
+    public boolean oldIsOnGroundOld()
+    {
+        return this.oldIsOnGround;
+    }
+
+    public Object getXA() {
+        return xa;
     }
 }

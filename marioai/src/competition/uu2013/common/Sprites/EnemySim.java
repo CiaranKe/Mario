@@ -32,6 +32,8 @@ public class EnemySim extends SpriteSim implements Comparable
     protected float accurateX;
     protected boolean yaUnknown;
     protected boolean firstMove;
+    private float oldX;
+    private float oldY;
 
     public EnemySim(float _x, float _y, int _type )
     {
@@ -195,6 +197,9 @@ public class EnemySim extends SpriteSim implements Comparable
 
     public void move()
     {
+        this.oldX = x;
+        this.oldY = y;
+
         if (xa == -1.5575F && ya == 1.7F)
         {
             System.out.println();
@@ -445,7 +450,7 @@ public class EnemySim extends SpriteSim implements Comparable
 
         if (xMarioD > -width*2-4 && xMarioD < width*2+4) {
             if (yMarioD > -height && yMarioD < marioSim.height()) {
-                if (!canKill() && marioSim.getYa() > 0 && yMarioD <= 0 && (!marioSim.isOnGround() || !marioSim.wasOnGround()))
+                if (!canKill() && marioSim.getYa() > 0 && yMarioD <= 0 && (!marioSim.wasOnGround() || !marioSim.isOnGround()))
                 {
                     marioSim.stomp(this);
                 }

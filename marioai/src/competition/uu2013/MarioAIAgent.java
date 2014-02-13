@@ -26,6 +26,7 @@ package competition.uu2013;/*
  */
 
 import ch.idsia.agents.Agent;
+import ch.idsia.benchmark.mario.engine.MarioVisualComponent;
 import ch.idsia.benchmark.mario.environments.Environment;
 import competition.uu2013.common.Map;
 
@@ -90,6 +91,7 @@ public class MarioAIAgent implements Agent
 
     public void integrateObservation(Environment environment)
     {
+
         levelScene = environment.getLevelSceneObservationZ(zLevelScene);        //Map.printScene(levelScene0, "Scene0");
         //Map.printScene(levelScene1, "Scene1");
         //Map.printScene(levelScene2, "Scene2");

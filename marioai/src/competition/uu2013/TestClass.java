@@ -1,207 +1,70 @@
-package competition.uu2013.common;
+package competition.uu2013;
 
-
-import ch.idsia.benchmark.mario.engine.GeneralizerLevelScene;
-import ch.idsia.benchmark.mario.engine.GlobalOptions;
 import ch.idsia.benchmark.mario.engine.LevelScene;
-import ch.idsia.tools.MarioAIOptions;
-import competition.uu2013.common.Sprites.EnemySim;
 
 import java.io.DataInputStream;
-import java.util.ArrayList;
 
-public class Map
+/**
+ * Created with IntelliJ IDEA.
+ * User: fluffy
+ * Date: 12/02/14
+ * Time: 15:14
+ * To change this template use File | Settings | File Templates.
+ */
+public class TestClass
 {
-    public static final int CELL_SIZE = 16;
-    public static final byte MARIO = 1;
-    public static final byte COIN = 34;
-    public static final byte PLATFORM = -11;
 
-    public static int levelWidth;
-    public static int levelHeight;
-    private static byte [][] map;
+
 
     public static byte[] TILE_BEHAVIORS = new byte[256];
-    public static final int BIT_BLOCK_UPPER = 1;
-    public static final int BIT_BLOCK_ALL = 2;
-    public static final int BIT_BLOCK_LOWER = 4;
-    public static final int BIT_SPECIAL = 8;
-    public static final int BIT_BUMPABLE = 16;
-    public static final int BIT_BREAKABLE = 32;
-    public static final int BIT_PICKUPABLE = 64;
-    public static final int BIT_ANIMATED = 128;
+
+    public static final int BIT_BLOCK_UPPER = 1 << 0;
+    public static final int BIT_BLOCK_ALL = 1 << 1;
+    public static final int BIT_BLOCK_LOWER = 1 << 2;
 
 
+    public static final int CANNON_MUZZLE = -82;
+    public static final int CANNON_TRUNK = -80;
+    public static final int COIN_ANIM = 2;
+    public static final int BREAKABLE_BRICK = -20;
+    public static final int UNBREAKABLE_BRICK = -22; //a rock with animated question mark
+    public static final int BRICK = -24;           //a rock with animated question mark
+    public static final int FLOWER_POT = -90;
+    public static final int BORDER_CANNOT_PASS_THROUGH = -60;
+    public static final int BORDER_HILL = -62;
+    public static final int FLOWER_POT_OR_CANNON = -85;
+    public static final int LADDER = 61;
+    public static final int TOP_OF_LADDER = 61;
+    public static final int PRINCESS = 5;
 
-    public static void setMap(int levelHeight, int levelWidth, MarioAIOptions options)
+
+    public static void main(String [] args)
     {
-        Map.levelHeight = levelHeight;
-        Map.levelWidth = levelWidth;
+        setTiles();
 
-        map = new byte[levelWidth][levelHeight];
+        float ya = -5;
 
-        loadTiles();
-    }
+        byte b = -60;
 
+        int y = b;
+        boolean block = ((TILE_BEHAVIORS[y & 0xff]) & BIT_BLOCK_ALL) > 0;
+        block |= (ya > 0) && ((TILE_BEHAVIORS[y & 0xff]) & BIT_BLOCK_UPPER) > 0;
+        block |= (ya < 0) && ((TILE_BEHAVIORS[y & 0xff]) & BIT_BLOCK_LOWER) > 0;
+        System.out.println(y + ": " + block);
 
-    public  byte getViewAt(float x, float y) {
-        int marioX = (int) x / Map.CELL_SIZE;
-        int marioY = (int) y / Map.CELL_SIZE;
-
-        return map[marioX][marioY];
-    }
-
-
-    public void setScene(byte[][] scene, float marioXFloat, float marioYFloat)
-    {
-        int marioX = (int) marioXFloat / Map.CELL_SIZE;
-        int marioY = (int) marioYFloat / Map.CELL_SIZE;
-        int rfHeight = scene.length;
-        int rfWidth = scene[0].length;
-        int halfHeight = rfHeight /2;
-        int halfWidth = rfWidth /2;
-
-        //scene[height][width]
-        //map[height][width]
-        for (int y = (marioY - halfHeight), yUpdate = 0; y < (marioY + halfHeight); y++, yUpdate++)
+        for (int x = -150; x < 30; x++)
         {
-            for (int x = (marioX - halfHeight), xUpdate = 0; x < (marioX + halfHeight); x++, xUpdate++)
+            if(x == -128|| x == -127|| x == -126|| x == -125|| x == -120|| x == -119|| x == -118|| x == -117|| x == -116|| x == -115|| x == -114|| x == -113|| x == -112|| x == -110|| x == -109|| x == -104|| x == -103|| x == -102|| x == -101|| x == -100|| x == -99|| x == -98|| x == -97|| x == -96|| x == -95|| x == -94|| x == -93|| x == -69|| x == -65|| x == -88|| x == -87|| x == -86|| x == -85|| x == -84|| x == -83|| x == -82|| x == -81|| x == -77|| x == -111|| x == 4|| x == 9)
             {
-                if ((y> 0) && (x > 0) && (y < Map.levelHeight) && (x < Map.levelWidth))
-                {
-                    Map.setBlock(x,y,scene[yUpdate][xUpdate]);
-                }
+                boolean blocking = ((TILE_BEHAVIORS[x & 0xff]) & BIT_BLOCK_ALL) > 0;
+                blocking |= (ya > 0) && ((TILE_BEHAVIORS[x & 0xff]) & BIT_BLOCK_UPPER) > 0;
+                blocking |= (ya < 0) && ((TILE_BEHAVIORS[x & 0xff]) & BIT_BLOCK_LOWER) > 0;
+                System.out.println(x + ": " + blocking);
             }
         }
-        //Map.printMap(map,"Sim");
     }
 
-
-    public static void addLine(float x0, float y0, float x1, float y1)
-    {
-        if(GlobalOptions.PosSize < 400)
-        {
-            GlobalOptions.Pos[GlobalOptions.PosSize][0] = (int)x0;
-            GlobalOptions.Pos[GlobalOptions.PosSize][1] = (int)y0;
-            GlobalOptions.PosSize++;
-            GlobalOptions.Pos[GlobalOptions.PosSize][0] = (int)x1;
-            GlobalOptions.Pos[GlobalOptions.PosSize][1] = (int)y1;
-            GlobalOptions.PosSize++;
-        }
-    }
-
-    public boolean dangerOfGap(float landPositionX)
-    {
-        int landingCell = (int) landPositionX / Map.CELL_SIZE;
-
-        if ((map[landingCell][levelHeight -1] != 0) ||
-            (map[landingCell +1][levelHeight -1] != 0) ||
-            (map[landingCell -1][levelHeight -1] != 0))
-        {
-            return false;
-        }
-
-        return true;
-    }
-
-    public static void printMap()
-    {
-        System.out.println("---------------------------------------------------------------------------");
-        for (int y = 0; y < levelHeight; y++)
-        {
-
-            for (int x= 0; x < levelWidth; x++)
-            {
-
-                System.out.print(map[x][y] + "\t");
-            }
-            System.out.println();
-        }
-        System.out.println("---------------------------------------------------------------------------");
-    }
-
-    public static void printScene(byte[][] scene, String name)
-    {
-
-        int halfWidth = scene.length /2;
-        System.out.println(name + "---------------------------------------------------------------------------");
-        for (int x = 0; x < scene.length; x++)
-        {
-            for (int y = 0; y < scene[0].length; y++)
-            {
-                if (y == halfWidth && x == halfWidth)
-                {
-                    System.out.print("M\t");
-                }
-                else
-                {
-                    System.out.print(scene[x][y] + "\t");
-                }
-            }
-            System.out.println();
-        }
-        System.out.println("---------------------------------------------------------------------------");
-    }
-
-
-    public static void CompareMap(byte[][] _map, String name)
-    {
-        System.out.println(name + "---------------------------------------------------------------------------");
-        for (int y = 0; y < levelHeight; y++)
-        {
-
-            for (int x= 0; x < levelWidth; x++)
-            {
-                boolean sim = (map[x][y] !=0);
-                boolean act = (_map[x][y] !=0);
-
-                if (sim == act)
-                {
-                    System.out.print("M\t");
-                }
-                else
-                {
-                    System.out.print(_map[x][y]+"\t");
-                }
-
-            }
-            System.out.println();
-        }
-        System.out.println("---------------------------------------------------------------------------");
-    }
-
-    public static byte getBlock(int x, int y)
-    {
-        if (x < 0) x = 0;
-        if (y < 0) return 0;
-        if (x >= levelWidth) x = levelWidth - 1;
-        if (y >= levelHeight) y = levelHeight - 1;
-        return map[x][y];
-    }
-
-    public static void setBlock(int x, int y, byte b)
-    {
-        if (x < 0) return;
-        if (y < 0) return;
-        if (x >= levelWidth) return;
-        if (y >= levelHeight) return;
-        map[x][y] = b;
-    }
-
-    public static boolean isBlocking(int x, int y, float xa, float ya)
-    {
-
-        byte block = getBlock(x, y);
-
-        if (block == 2)
-        {
-            return false;
-        }
-
-        return block != 0;
-    }
-
-    private static void loadTiles()
+    static void setTiles()
     {
         TILE_BEHAVIORS[0] =0;
         TILE_BEHAVIORS[1] =20;

@@ -16,7 +16,7 @@ public class FireBallSim extends EnemySim
     private static float FIREBALL_GROUND_INERTIA = 0.89f;
     private static float FIREBALL_AIR_INERTIA = 0.89f;
 
-    public FireBallSim(float _x, float _y, int _type)
+    public FireBallSim(float _x, float _y, int _type, int dir)
     {
         super(_x, _y, _type);
 
@@ -25,12 +25,12 @@ public class FireBallSim extends EnemySim
 
         height = 8;
         ya = 4;
-        facing = -1;
+        facing = dir;
     }
 
     public FireBallSim clone()
     {
-        FireBallSim n = new FireBallSim(this.x, this.y, this.type);
+        FireBallSim n = new FireBallSim(this.x, this.y, this.type, this.facing);
         n.x = this.x;
         n.y = this.y;
         n.ya = this.ya;
@@ -106,6 +106,8 @@ public class FireBallSim extends EnemySim
         {
             ya += 1.5;
         }
+
+        System.out.println("Simmed Fireball: X:" + x + " Y: " + y );
     }
 
     public boolean move(float xa, float ya)
@@ -215,5 +217,6 @@ public class FireBallSim extends EnemySim
         xa = -facing * 2;
         ya = -5;
         deadTime = 100;
+        System.out.println("Simmed Fireball died!");
     }
 }

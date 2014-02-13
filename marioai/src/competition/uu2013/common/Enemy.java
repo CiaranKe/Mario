@@ -17,6 +17,7 @@ public class Enemy
 
     private static ArrayList<SpriteSim> enemiesList;
 
+
     public Enemy() //Fight the power!!
     {
         enemiesList = new ArrayList<SpriteSim>();
@@ -80,7 +81,7 @@ public class Enemy
         for (int i = 0; i < enemies.length; i += 3)
         {
             SpriteSim newEnemy = this.createEnemy((marioX + enemies[i+1]),(marioY + enemies[i+2]),(int)enemies[i]);
-            System.out.println("Actu: Type (" + this.nameEnemy((int)enemies[i])  + "):" + (int)enemies[i] + " X: " + (marioX + enemies[i+1]) + " Y: " + (marioY + enemies[i+2]));
+            //System.out.println("Actu: Type (" + this.nameEnemy((int)enemies[i])  + "):" + (int)enemies[i] + " X: " + (marioX + enemies[i+1]) + " Y: " + (marioY + enemies[i+2]));
 
 
             if (newEnemy.getType() == -1 || newEnemy.getType() == 15)
@@ -91,7 +92,7 @@ public class Enemy
             boolean enemyFound = false;
             for (SpriteSim sprite:enemiesList)
             {
-                System.out.println("Sim: Type (" + Enemy.nameEnemy(sprite.getType()) + "):" + sprite.getType() + " X: " + sprite.getX() + " Y: " + sprite.getY() + " XA: " + ((EnemySim) sprite).getXA() + " YA: " + ((EnemySim) sprite).getYA() + " Facing" + ((EnemySim) sprite).getFacing());
+                //System.out.println("Sim: Type (" + Enemy.nameEnemy(sprite.getType()) + "):" + sprite.getType() + " X: " + sprite.getX() + " Y: " + sprite.getY() + " XA: " + ((EnemySim) sprite).getXA() + " YA: " + ((EnemySim) sprite).getYA() + " Facing" + ((EnemySim) sprite).getFacing());
                 // check if object is of same kind and close enough
                 if (sprite.getType() == newEnemy.getType()
                         && Math.abs(sprite.getX() - newEnemy.getX()) < maxDelta
@@ -136,7 +137,7 @@ public class Enemy
 
                 if (enemyFound)
                 {
-                    System.out.println("Updating!");
+                    //System.out.println("Updating!");
                     newSprites.add(sprite);
                     ((EnemySim) sprite).setAccurateX(newEnemy.getX());
                     ((EnemySim) sprite).setAccurateY(newEnemy.getY());
@@ -147,7 +148,7 @@ public class Enemy
             // create a new one.
             if (!enemyFound)
             {
-                System.out.println("Adding!");
+                //System.out.println("Adding!");
                 requireReplanning = true;
                     // Add new enemy to the system.
                 ((EnemySim)newEnemy).setXA(2);
@@ -156,7 +157,7 @@ public class Enemy
                 newSprites.add(newEnemy);
             }
         }
-        //newSprites.add(mario);
+        //newSprites.add(reddit);
 
         // add fireballs
         for (SpriteSim sprite:newSprites)
@@ -363,8 +364,6 @@ public class Enemy
                 return new BulletSim(_x, _y, _type);
             case Sprite.KIND_WAVE_GOOMBA:
                 return new WaveSim(_x, _y, _type);
-            case Sprite.KIND_FIREBALL:
-                return new FireBallSim(_x,_y,_type);
             case Sprite.KIND_SHELL:
                 return new ShellSim(_x, _y, _type);
             default:
