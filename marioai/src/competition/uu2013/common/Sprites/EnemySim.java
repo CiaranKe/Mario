@@ -1,8 +1,8 @@
 package competition.uu2013.common.Sprites;
 
 import ch.idsia.benchmark.mario.engine.sprites.Sprite;
-import competition.uu2013.common.Map;
-import competition.uu2013.common.WorldSim;
+import competition.uu2013.common.level.Map;
+import competition.uu2013.common.level.WorldSim;
 
 /**
  * Created with IntelliJ IDEA.
@@ -32,8 +32,9 @@ public class EnemySim extends SpriteSim implements Comparable
     protected float accurateX;
     protected boolean yaUnknown;
     protected boolean firstMove;
-    private float oldX;
-    private float oldY;
+    protected float oldX;
+    protected float oldY;
+    protected Map map;
 
     public EnemySim(float _x, float _y, int _type )
     {
@@ -89,17 +90,14 @@ public class EnemySim extends SpriteSim implements Comparable
         }
     }
 
-    public EnemySim clone()
+    @Override
+    public EnemySim clone()  throws CloneNotSupportedException
     {
         EnemySim n = new EnemySim(this.x, this.y, this.type);
         n.x = this.x;
-        n.accurateY = this.accurateY;
-        n.accurateX = this.accurateX;
-        n.yaUnknown = this.yaUnknown;
-        n.worldSim = this.worldSim;
         n.y = this.y;
-        n.ya = this.ya;
         n.xa = this.xa;
+        n.ya = this.ya;
         n.facing = this.facing;
         n.type = this.type;
         n.lastX = this.lastX;
@@ -112,7 +110,14 @@ public class EnemySim extends SpriteSim implements Comparable
         n.seen = this.seen;
         n.flyDeath = this.flyDeath;
         n.deadTime = this.deadTime;
+        n.noFireballDeath = this.noFireballDeath;
         n.dead = this.dead;
+        n.accurateY = this.accurateY;
+        n.accurateX = this.accurateX;
+        n.yaUnknown = this.yaUnknown;
+        n.firstMove = this.firstMove;
+        n.oldX = this.oldX;
+        n.oldY = this.oldY;
         return n;
     }
 
@@ -129,6 +134,11 @@ public class EnemySim extends SpriteSim implements Comparable
     public void setMarioSim(MarioSim _marioSim)
     {
         this.marioSim = _marioSim;
+    }
+
+    public void setMapSim (Map _map)
+    {
+        this.map = _map;
     }
 
     public int height ()
@@ -315,7 +325,7 @@ public class EnemySim extends SpriteSim implements Comparable
             if (isBlocking(x + xa + width, y + ya - height / 2, xa, ya)) collide = true;
             if (isBlocking(x + xa + width, y + ya, xa, ya)) collide = true;
 
-            if (avoidCliffs && onGround && !Map.isBlocking((int) ((x + xa + width) / 16), (int) ((y) / 16 + 1), xa, 1))
+            if (avoidCliffs && onGround && !map.isBlocking((int) ((x + xa + width) / 16), (int) ((y) / 16 + 1)))
                 collide = true;
         }
         if (xa < 0)
@@ -324,7 +334,7 @@ public class EnemySim extends SpriteSim implements Comparable
             if (isBlocking(x + xa - width, y + ya - height / 2, xa, ya)) collide = true;
             if (isBlocking(x + xa - width, y + ya, xa, ya)) collide = true;
 
-            if (avoidCliffs && onGround && !Map.isBlocking((int) ((x + xa - width) / 16), (int) ((y) / 16 + 1), xa, 1))
+            if (avoidCliffs && onGround && !map.isBlocking((int) ((x + xa - width) / 16), (int) ((y) / 16 + 1)))
                 collide = true;
         }
 
@@ -366,7 +376,7 @@ public class EnemySim extends SpriteSim implements Comparable
         int y = (int) (_y / 16);
         if (x == (int) (this.x / 16) && y == (int) (this.y / 16)) return false;
 
-        boolean blocking = Map.isBlocking(x, y, xa, ya);
+        boolean blocking = map.isBlocking(x, y);
 
 //        byte block = levelScene.level.getBlock(x, y);
 

@@ -1,6 +1,6 @@
 package competition.uu2013.common.Sprites;
 
-import competition.uu2013.common.Map;
+import competition.uu2013.common.level.Map;
 
 /**
  * Created with IntelliJ IDEA.
@@ -9,7 +9,7 @@ import competition.uu2013.common.Map;
  * Time: 17:13
  * To change this template use File | Settings | File Templates.
  */
-public class GreenMushroomSim  extends MushroomSim
+public class GreenMushroomSim  extends MushroomSim  implements Cloneable
 {
 
     public GreenMushroomSim(float _x, float _y, int _type)
@@ -21,29 +21,10 @@ public class GreenMushroomSim  extends MushroomSim
         life = 0;
     }
 
-    public GreenMushroomSim clone()
+    @Override
+    public GreenMushroomSim clone() throws CloneNotSupportedException
     {
-        GreenMushroomSim n = new GreenMushroomSim(this.x, this.y, this.type);
-        n.x = this.x;
-        n.y = this.y;
-        n.ya = this.ya;
-        n.xa = this.xa;
-        n.facing = this.facing;
-        n.type = this.type;
-        n.lastX = this.lastX;
-        n.lastY = this.lastY;
-        n.height = this.height;
-        n.width = this.width;
-        n.avoidCliffs = this.avoidCliffs;
-        n.winged = this.winged;
-        n.onGround = this.onGround;
-        n.seen = this.seen;
-        n.flyDeath = this.flyDeath;
-        n.deadTime = this.deadTime;
-        n.dead = this.dead;
-        n.life = this.life;
-        n.jumpTime = this.jumpTime;
-        n.mayJump = this.mayJump;
+        GreenMushroomSim n = (GreenMushroomSim) super.clone();
         return n;
     }
 
@@ -147,7 +128,7 @@ public class GreenMushroomSim  extends MushroomSim
             if (isBlocking(x + xa + width, y + ya - height / 2, xa, ya)) collide = true;
             if (isBlocking(x + xa + width, y + ya, xa, ya)) collide = true;
 
-            if (avoidCliffs && onGround && !Map.isBlocking((int) ((x + xa + width) / 16), (int) ((y) / 16 + 1), xa, 1))
+            if (avoidCliffs && onGround && !map.isBlocking((int) ((x + xa + width) / 16), (int) ((y) / 16 + 1)))
                 collide = true;
         }
         if (xa < 0)
@@ -156,7 +137,7 @@ public class GreenMushroomSim  extends MushroomSim
             if (isBlocking(x + xa - width, y + ya - height / 2, xa, ya)) collide = true;
             if (isBlocking(x + xa - width, y + ya, xa, ya)) collide = true;
 
-            if (avoidCliffs && onGround && !Map.isBlocking((int) ((x + xa - width) / 16), (int) ((y) / 16 + 1), xa, 1))
+            if (avoidCliffs && onGround && !map.isBlocking((int) ((x + xa - width) / 16), (int) ((y) / 16 + 1)))
                 collide = true;
         }
 
@@ -198,9 +179,9 @@ public class GreenMushroomSim  extends MushroomSim
         int y = (int) (_y / 16);
         if (x == (int) (this.x / 16) && y == (int) (this.y / 16)) return false;
 
-        boolean blocking = Map.isBlocking(x, y, xa, ya);
+        boolean blocking = map.isBlocking(x, y);
 
-        byte block = Map.getBlock(x, y);
+        byte block = map.getBlock(x, y);
 
         return blocking;
     }

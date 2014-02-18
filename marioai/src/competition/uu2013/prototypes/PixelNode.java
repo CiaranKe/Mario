@@ -1,7 +1,6 @@
 package competition.uu2013.prototypes;
 
 import ch.idsia.benchmark.mario.environments.Environment;
-import competition.uu2013.common.Action;
 
 import java.io.*;
 import java.util.HashMap;
@@ -51,15 +50,15 @@ public class PixelNode implements  java.io.Serializable
 
         this.children = new HashMap<boolean[], PixelNode>();
         //this.children.put(Action.createAction(Action.WAIT),null);
-        this.children.put(Action.createAction(Action.JUMP),null);
-        this.children.put(Action.createAction(Action.JUMP_SPEED),null);
+        this.children.put(ActionNode.createAction(Action.JUMP),null);
+        this.children.put(ActionNode.createAction(Action.JUMP_SPEED),null);
         //this.children.put(Action.createAction(Action.UP),null);
-        this.children.put(Action.createAction(Action.SHOOT),null);
+        this.children.put(ActionNode.createAction(Action.SHOOT),null);
         //this.children.put(Action.createAction(Action.DUCK),null);
-        this.children.put(Action.createAction(Action.RIGHT),null);
-        this.children.put(Action.createAction(Action.RIGHT_JUMP_SPEED),null);
-        this.children.put(Action.createAction(Action.RIGHT_JUMP),null);
-        this.children.put(Action.createAction(Action.RIGHT_SPEED),null);
+        this.children.put(ActionNode.createAction(Action.RIGHT),null);
+        this.children.put(ActionNode.createAction(Action.RIGHT_JUMP_SPEED),null);
+        this.children.put(ActionNode.createAction(Action.RIGHT_JUMP),null);
+        this.children.put(ActionNode.createAction(Action.RIGHT_SPEED),null);
         //this.children.put(Action.createAction(Action.LEFT),null);
         //this.children.put(Action.createAction(Action.LEFT_JUMP),null);
         //this.children.put(Action.createAction(Action.LEFT_JUMP_SPEED),null);

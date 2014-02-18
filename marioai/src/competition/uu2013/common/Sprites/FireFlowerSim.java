@@ -7,7 +7,7 @@ package competition.uu2013.common.Sprites;
  * Time: 17:26
  * To change this template use File | Settings | File Templates.
  */
-public class FireFlowerSim extends EnemySim
+public class FireFlowerSim extends EnemySim implements Cloneable
 {
     private int life;
 
@@ -20,26 +20,10 @@ public class FireFlowerSim extends EnemySim
         life = 0;
     }
 
-    public FireFlowerSim clone()
+    @Override
+    public FireFlowerSim clone() throws CloneNotSupportedException
     {
-        FireFlowerSim n = new FireFlowerSim(this.x, this.y, this.type);
-        n.x = this.x;
-        n.y = this.y;
-        n.ya = this.ya;
-        n.xa = this.xa;
-        n.facing = this.facing;
-        n.type = this.type;
-        n.lastX = this.lastX;
-        n.lastY = this.lastY;
-        n.height = this.height;
-        n.width = this.width;
-        n.avoidCliffs = this.avoidCliffs;
-        n.winged = this.winged;
-        n.onGround = this.onGround;
-        n.seen = this.seen;
-        n.flyDeath = this.flyDeath;
-        n.deadTime = this.deadTime;
-        n.dead = this.dead;
+        FireFlowerSim n = (FireFlowerSim) super.clone();
         n.life = this.life;
         return n;
     }

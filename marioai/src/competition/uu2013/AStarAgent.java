@@ -1,97 +1,61 @@
 package competition.uu2013;
 
 import ch.idsia.agents.Agent;
-import ch.idsia.agents.controllers.BasicMarioAIAgent;
+import ch.idsia.benchmark.mario.engine.sprites.Mario;
 import ch.idsia.benchmark.mario.environments.Environment;
-import competition.uu2013.common.Action;
-import competition.uu2013.common.Map;
+import competition.uu2013.common.hueristics.AStarSearch;
+import competition.uu2013.common.hueristics.AStarSearchAttempt1;
+import competition.uu2013.prototypes.Action;
+import competition.uu2013.common.level.Enemy;
+import competition.uu2013.common.level.Map;
+import competition.uu2013.common.level.WorldSim;
+import competition.uu2013.common.Sprites.MarioSim;
 
-import java.util.ArrayList;
-import java.util.LinkedList;
-
-public class AStarAgent extends BasicMarioAIAgent implements Agent
+public class AStarAgent extends MarioAIAgent implements Agent
 {
-    private boolean action[];
-    private String name;
-    private int jumpCounter;
-    private int speedCounter;
-//    LinkedList<PixelNode> openList;
-//    LinkedList<PixelNode> closedList;
-    LinkedList<boolean[]> actionList;
-
+    private AStarSearch search;
 
 
     public AStarAgent()
     {
         super("AStarAgent");
-        this.name = "AStarAgent";
-        this.action = new boolean[Environment.numberOfKeys];
-//        this.openList = new LinkedList<PixelNode>();
-//        this.closedList = new LinkedList<PixelNode>();
-        this.actionList = new LinkedList<boolean[]>();
+        reset();
     }
 
-
-    public boolean[] getAction()
+    @Override
+    public boolean [] getAction()
     {
-        this.pathFind();
-        return null;
-    }
-
-
-    public void reset()
-    {
-        this.action = Action.createAction(Action.RIGHT_SPEED);
-        this.jumpCounter = 0;
-        this.speedCounter = 0;
-    }
-
-
-    private void pathFind()
-    {
-
-/*        PixelNode startNode = null; // Map.getNodeAt(this.marioFloatPos[0], this.marioFloatPos[1]);
-        openList.add(startNode);
-        ArrayList<boolean[]> possibleActions = Action.getPossibleActions(this.isMarioAbleToJump,this.marioFloatPos[0],
-                this.marioFloatPos[1]);
-
-        for (boolean [] pAction:  possibleActions)
+        long startTime = System.currentTimeMillis();
+        System.out.println("============================================================================================");
+        //--------------------------------------------------------------------------------------------------
+        if (search == null)
         {
-            float [] nodePosition = Map.getActionCoOrdinates(pAction,this.marioFloatPos[0], this.marioFloatPos[1],
-                      this.isMarioAbleToJump,this.isMarioOnGround, this.marioMode);
-            PixelNode temp =  null; //Map.getNodeAt(nodePosition[0], nodePosition[1]);
-
-            //calculate vector distance.
-            //temp.distance =
-
-            openList.add(temp);
-
-
+            search = new AStarSearch(new WorldSim(new MarioSim(marioFloatPos[0],marioFloatPos[1], 0.0F, 3.0F), new Enemy(), new Map()));
+            search.updateSim(marioFloatPos[0], marioFloatPos[1], isMarioAbleToJump, isMarioOnGround, isMarioAbleToShoot, (marioStatus == 1), this.enemiesFloatPos, this.levelScene, action);
 
         }
+        else
+        {
+            System.out.println("Updating sim");
+            search.updateSim(marioFloatPos[0], marioFloatPos[1], isMarioAbleToJump, isMarioOnGround, isMarioAbleToShoot, (marioStatus == 1), this.enemiesFloatPos, this.levelScene, action);
+            action = search.pathFind(marioFloatPos[0],marioFloatPos[1],startTime);
+            System.out.println("Completing: " + Action.nameAction(action));
 
-
-        //Iterate through processing each node.
-
-            /*
-            while (open.size()>0){
-                    //Find the smallest element in the open list.
-                    // using the estimatedTotalCost.
-                    int current= open.getFirst().estTotalCost;
-                    NodeRecord currentNode = open.getFirst();
-                    for (int i=0; i < open.size(); i++){
-                            if (current> open.get(i).estTotalCost){
-                                    current = open.get(i).estTotalCost;
-                                    currentNode = open.get(i);}
-                    }
-                    // end != goal?
-                    // If it is the goal node, then terminate.
-                    if (currentNode.n == end) break;
-
-                    //Otherwise, get its outgoing connections.
-                    // connections = graph.getConnections(current) --> not sure what to do here.
-
-            }//end of while loop
-            */
+        }
+        //--------------------------------------------------------------------------------------------------
+        System.out.println("Method Time: " + (System.currentTimeMillis() - startTime));
+        System.out.println("============================================================================================");
+        return action;
     }
+
+
+    @Override
+    public void reset()
+    {
+
+        action = new boolean[Environment.numberOfKeys];
+    }
+
+
+
 }

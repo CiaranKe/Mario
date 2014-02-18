@@ -4,13 +4,13 @@ import ch.idsia.benchmark.mario.engine.GlobalOptions;
 import ch.idsia.benchmark.mario.engine.sprites.Mario;
 import ch.idsia.benchmark.mario.engine.sprites.Sprite;
 import ch.idsia.benchmark.mario.environments.Environment;
-import competition.uu2013.common.Map;
-import competition.uu2013.common.WorldSim;
+import competition.uu2013.common.level.Map;
+import competition.uu2013.common.level.WorldSim;
 
-public class MarioSim  extends SpriteSim
+public class MarioSim  extends SpriteSim  implements Cloneable
 {
 
-    public float x,y,xa,ya,lastX,lastY;          // max speed = 4.85 walking, 9.7 running
+    public float lastX,lastY;          // max speed = 4.85 walking, 9.7 running
     private boolean big = true;
     private boolean fire = true;
     private int invulnerableTime = 0;
@@ -34,6 +34,7 @@ public class MarioSim  extends SpriteSim
     private boolean oldIsOnGround;
     private Mario marioActual;
     private boolean ableToShoot = true;
+    private Map map;
 
 
     public static final int KEY_LEFT = 0;
@@ -52,12 +53,42 @@ public class MarioSim  extends SpriteSim
         xa = _xa;
         ya = _ya;
         keys_last = new boolean[Environment.numberOfKeys];
-        this.marioActual = GlobalOptions.mario;
     }
 
-    public MarioSim clone()
+    @Override
+    public MarioSim clone() throws CloneNotSupportedException
     {
-        MarioSim m = new MarioSim(this.x, this.y, this.xa, this.ya);
+        MarioSim m =  new MarioSim(this.x, this.y,this.xa, this.ya);
+        m.x = this.x;
+        m.y = this.y;
+        m.xa = this.xa;
+        m.ya = this.ya;
+        m.facing = this.facing;
+        m.type = this.type;
+        m.lastX = this.lastX;
+        m.lastY = this.lastY;
+        m.big = this.big;
+        m.fire = this.fire;
+        m.invulnerableTime = this.invulnerableTime;
+        m.jumpTime = this.jumpTime;
+        m.facing = this.facing;
+        m.onGround = this.onGround;
+        m.wasOnGround = this.wasOnGround;
+        m.mayJump = this.mayJump;
+        m.sliding = this.sliding;
+        m.dead = this.dead;
+        m.xJumpSpeed = this.xJumpSpeed;
+        m.yJumpSpeed = this.yJumpSpeed;
+        m.keys_last = this.keys_last;
+        m.keys = this.keys;
+        m.carried = this.carried;
+        m.oldX = this.oldX;
+        m.oldY = this.oldY;
+        m.oldYa = this.oldYa;
+        m.oldWasOnGround = this.oldWasOnGround;
+        m.oldIsOnGround = this.oldWasOnGround;
+        m.ableToShoot = this.ableToShoot;
+
         return m;
     }
 
@@ -76,6 +107,11 @@ public class MarioSim  extends SpriteSim
     public void setWorldSim(WorldSim _sim)
     {
         this.worldSim = _sim;
+    }
+
+    public void setMapSim(Map _map)
+    {
+        this.map = _map;
     }
 
 
@@ -171,12 +207,12 @@ public class MarioSim  extends SpriteSim
         }
 
 
-        if (keys[KEY_SPEED] && ableToShoot && this.fire && worldSim.numFireBalls() < 2)
-        {
-            worldSim.addFireball(new FireBallSim(x + facing * 6, y - 20, Sprite.KIND_FIREBALL , facing));
-        }
+        //if (keys[KEY_SPEED] && ableToShoot && this.fire && worldSim.numFireBalls() < 2)
+        //{
+            //worldSim.addFireball(new FireBallSim(x + facing * 6, y - 20, Sprite.KIND_FIREBALL , facing));
+        //}
 
-        ableToShoot = (worldSim.numFireBalls() < 2);
+        //ableToShoot = (worldSim.numFireBalls() < 2);
 
         mayJump = (onGround || sliding) && !keys[KEY_JUMP];
 
@@ -306,14 +342,14 @@ public class MarioSim  extends SpriteSim
         int My = (int) (this.y / 16);
         if (x == Mx && y == My) return false;
 
-        boolean blocking = Map.isBlocking(x,y,xa,ya);
+        boolean blocking = map.isBlocking(x,y);
 
-        byte block = Map.getBlock(x,y);
+        byte block = map.getBlock(x,y);
 
         if(block == 34) { // coin
 
 
-            Map.setBlock(x,y,(byte)0);
+            map.setBlock(x,y,(byte)0);
             return false;
         }
 
@@ -371,17 +407,27 @@ public class MarioSim  extends SpriteSim
     {
         if (invulnerableTime > 0) return;
 
-        if (big) {
-            if (fire) {
+        if (big)
+        {
+            if (fire)
+            {
                 fire = false;
-            } else {
+            }
+            else
+            {
                 big = false;
             }
             invulnerableTime = 32;
-        } else {
+        }
+        else
+        {
             dead = true;
         }
-        dead = true;
+    }
+
+    public boolean isDead()
+    {
+        return this.dead;
     }
 
     public void syncLocation(float _x, float _y, boolean _mayJump, boolean _onGround, boolean _fire, boolean _big)
@@ -452,7 +498,28 @@ public class MarioSim  extends SpriteSim
         return this.oldIsOnGround;
     }
 
-    public Object getXA() {
+    public float getXA() {
         return xa;
+    }
+
+    public int getMarioMode()
+    {
+        if (this.fire)
+        {
+            return 2;
+        }
+        if (this.big)
+        {
+            return 1;
+        }
+        return 0;
+    }
+
+    public boolean isMarioAbletoJump() {
+        return mayJump;
+    }
+
+    public int getJumpTime() {
+        return jumpTime;
     }
 }

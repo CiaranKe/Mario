@@ -9,7 +9,7 @@ import competition.uu2013.common.Sprites.EnemySim;
  * Time: 14:15
  * To change this template use File | Settings | File Templates.
  */
-public class EnemyFlowerSim extends EnemySim
+public class EnemyFlowerSim extends EnemySim implements Cloneable
 {
     private int yStart;
     private int jumpTime = 0;
@@ -32,26 +32,11 @@ public class EnemyFlowerSim extends EnemySim
         }
     }
 
-    public EnemyFlowerSim Clone()
+    @Override
+    public EnemyFlowerSim clone() throws CloneNotSupportedException
     {
-        EnemyFlowerSim n = new EnemyFlowerSim(this.x, this.y, this.type);
-        n.x = this.x;
-        n.y = this.y;
-        n.ya = this.ya;
-        n.xa = this.xa;
-        n.facing = this.facing;
-        n.type = this.type;
-        n.lastX = this.lastX;
-        n.lastY = this.lastY;
-        n.height = this.height;
-        n.width = this.width;
-        n.avoidCliffs = this.avoidCliffs;
-        n.winged = this.winged;
-        n.onGround = this.onGround;
-        n.seen = this.seen;
-        n.flyDeath = this.flyDeath;
-        n.deadTime = this.deadTime;
-        n.dead = this.dead;
+        EnemyFlowerSim n = (EnemyFlowerSim) super.clone();
+        n.yStart = this.yStart;
         n.jumpTime = this.jumpTime;
         return n;
     }

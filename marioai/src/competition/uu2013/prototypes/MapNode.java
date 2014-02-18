@@ -1,8 +1,8 @@
 package competition.uu2013.prototypes;
 
 import ch.idsia.benchmark.mario.engine.GeneralizerLevelScene;
+import ch.idsia.benchmark.mario.engine.sprites.Mario;
 import ch.idsia.benchmark.mario.environments.Environment;
-import competition.uu2013.common.oldCode.sprites.Mario;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -120,8 +120,8 @@ public class MapNode implements Serializable
     //----------------- INSTANCE ---------------------------------------------------------------------//
 
 
-    private ArrayList<Action> actionList;
-    private Action lastAction;
+    private ArrayList<ActionNode> actionNodeList;
+    private ActionNode lastActionNode;
     private int [] location;
     private int ID;
     private int stuckCounter;
@@ -129,11 +129,11 @@ public class MapNode implements Serializable
 
     public int countActions()
     {
-        if (actionList == null)
+        if (actionNodeList == null)
         {
             return 0;
         }
-        return actionList.size();
+        return actionNodeList.size();
     }
 
     public MapNode(int _direction, byte[][] _scene, int x, int y, int _newID)
@@ -143,10 +143,10 @@ public class MapNode implements Serializable
         this.location[1] = y;
         this.ID = _newID;
 
-        if(actionList == null)
+        if(actionNodeList == null)
         {
-            actionList = new ArrayList<Action>();
-            actionList.add(new Action(_direction, _scene));
+            actionNodeList = new ArrayList<ActionNode>();
+            actionNodeList.add(new ActionNode(_direction, _scene));
         }
     }
 
@@ -166,14 +166,14 @@ public class MapNode implements Serializable
         boolean[] nextAction = new boolean[Environment.numberOfKeys];
 
 
-        for (Action a : actionList)
+        for (ActionNode a : actionNodeList)
         {
             //System.out.println("Looking for action!");
             if (a.getDirection() == direction && a.compareScene(_scene))
             {
                 //System.out.println("found existing action!");
                 nextAction = a.getBestAction(_scene);
-                lastAction = a;
+                lastActionNode = a;
                 count++;
                 //return nextAction;
             }
@@ -236,19 +236,19 @@ public class MapNode implements Serializable
         //System.out.println("Mode: " + (environment.getMarioMode()*32) + " last Mode: " + (lastMode*32));
         float mode = (environment.getMarioMode() * 32) - (lastMode * 32);
         float newScore = (xScore*2) + yScore + mode;
-        lastAction.setScore(newScore+stuckPenalty, child);
+        lastActionNode.setScore(newScore+stuckPenalty, child);
     }
 
     public void addAction(int _direction, byte[][] _scene)
     {
-        actionList.add(new Action(_direction, _scene));
+        actionNodeList.add(new ActionNode(_direction, _scene));
     }
 
     public boolean hasChildren()
     {
         boolean children = false;
 
-        for (Action a : actionList)
+        for (ActionNode a : actionNodeList)
         {
             if(a.hasChild())
             {
@@ -264,7 +264,7 @@ public class MapNode implements Serializable
     private boolean hasScene(int direction, byte[][] _scene)
     {
         boolean hasScene = false;
-        for(Action a: actionList)
+        for(ActionNode a: actionNodeList)
         {
            if ((a.getDirection() == direction ) && a.compareScene(_scene))
             {
@@ -279,7 +279,7 @@ public class MapNode implements Serializable
     {
         //System.out.println("Node ("+ this.getID()  +  "): " + this.getLocation()[0] + ":" + this.getLocation()[1]);
 
-        for (Action a : actionList)
+        for (ActionNode a : actionNodeList)
         {
             //System.out.println("Direction: " + a.getDirection());
             int  [][] children = a.getChildren();
@@ -288,9 +288,9 @@ public class MapNode implements Serializable
 
             if (a.compareScene(_scene))
             {
-                for (int x = 0; x < Action.ACTION_COUNT; x++)
+                for (int x = 0; x < ActionNode.ACTION_COUNT; x++)
                 {
-                    //System.out.print("Action " + Action.nameAction(actions[x]));
+                    //System.out.print("ActionNode " + ActionNode.nameAction(actions[x]));
                     if (children[x] != null)
                     {
                         //System.out.print(" Leads to (" + children[x].getID() + "): " + children[x].getLocation()[0] + ":" + children[x].getLocation()[1] +"  Score: " + scores[x]);
@@ -306,7 +306,7 @@ public class MapNode implements Serializable
     }
 }
 
-class Action implements Serializable
+class ActionNode implements Serializable
 {
 
     private static final int RIGHT = 0;
@@ -326,7 +326,7 @@ class Action implements Serializable
     private int direction;
     private byte[][] scene;
 
-    public Action(int _direction, byte [][] _scene)
+    public ActionNode(int _direction, byte[][] _scene)
     {
         this.scene = _scene;
         this.direction = _direction;
@@ -404,8 +404,8 @@ class Action implements Serializable
                     _scene[11][x] == GeneralizerLevelScene.FLOWER_POT ||
                     _scene[11][x] == GeneralizerLevelScene.FLOWER_POT_OR_CANNON )
             {
-                    lastAction = Action.RIGHT_JUMP;
-                    return Action.createAction(Action.RIGHT_JUMP);
+                    lastAction = ActionNode.RIGHT_JUMP;
+                    return ActionNode.createAction(ActionNode.RIGHT_JUMP);
             }
         }
         float bestScore = -1;
@@ -417,7 +417,7 @@ class Action implements Serializable
             if (actionChildLocation[x] == null)
             {
                 lastAction = x;
-                //System.out.println("Action: " + Action.nameAction(action[lastAction]) + "Not tried" );
+                //System.out.println("ActionNode: " + ActionNode.nameAction(action[lastActionNode]) + "Not tried" );
                 nextAction =  action[x];
                 break;
             }
@@ -428,15 +428,15 @@ class Action implements Serializable
                     bestScore = score[x];
                     lastAction = x;
                     nextAction = action[x];
-                    //System.out.println(Action.nameAction(action[x]) +": Score is: " + score[x] + "SELECTED");
+                    //System.out.println(ActionNode.nameAction(action[x]) +": Score is: " + score[x] + "SELECTED");
                 }
                 else
                 {
-                    //System.out.println(Action.nameAction(action[x]) +": Score is: " + score[x]  + " less than :" + bestScore);
+                    //System.out.println(ActionNode.nameAction(action[x]) +": Score is: " + score[x]  + " less than :" + bestScore);
                 }
             }
         }
-        //System.out.println("--------- SELECTED " + Action.nameAction(nextAction) + "--------------------------------------" );
+        //System.out.println("--------- SELECTED " + ActionNode.nameAction(nextAction) + "--------------------------------------" );
         return new boolean[] { nextAction[0],nextAction[1],nextAction[2],nextAction[3],nextAction[4],nextAction[5] };
     }
 

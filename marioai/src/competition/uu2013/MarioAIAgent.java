@@ -26,9 +26,7 @@ package competition.uu2013;/*
  */
 
 import ch.idsia.agents.Agent;
-import ch.idsia.benchmark.mario.engine.MarioVisualComponent;
 import ch.idsia.benchmark.mario.environments.Environment;
-import competition.uu2013.common.Map;
 
 /**
  * Created by IntelliJ IDEA.

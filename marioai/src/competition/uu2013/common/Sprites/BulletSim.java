@@ -1,6 +1,6 @@
 package competition.uu2013.common.Sprites;
 
-public class BulletSim extends EnemySim
+public class BulletSim extends EnemySim implements Cloneable
 {
     public BulletSim(float _x, float _y, int _type)
     {
@@ -12,26 +12,10 @@ public class BulletSim extends EnemySim
         deadTime = 0;
     }
 
-    public BulletSim Clone()
+    @Override
+    public BulletSim clone() throws CloneNotSupportedException
     {
-        BulletSim n = new BulletSim(this.x, this.y, this.type);
-        n.x = this.x;
-        n.y = this.y;
-        n.ya = this.ya;
-        n.xa = this.xa;
-        n.facing = this.facing;
-        n.type = this.type;
-        n.lastX = this.lastX;
-        n.lastY = this.lastY;
-        n.height = this.height;
-        n.width = this.width;
-        n.avoidCliffs = this.avoidCliffs;
-        n.winged = this.winged;
-        n.onGround = this.onGround;
-        n.seen = this.seen;
-        n.flyDeath = this.flyDeath;
-        n.deadTime = this.deadTime;
-        n.dead = this.dead;
+        BulletSim n = (BulletSim) super.clone();
         return n;
     }
 

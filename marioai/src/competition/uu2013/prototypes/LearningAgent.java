@@ -11,7 +11,7 @@ public class LearningAgent extends BasicMarioAIAgent implements Agent
 {
     public MapNode currentMapNode;
     public MapNode lastMapNode;
-    private ArrayList<Action> plan;
+    private ArrayList<ActionNode> plan;
     private float lastX = 0.0F;
     private float lastY = 0.0F;
     private int lastMode;

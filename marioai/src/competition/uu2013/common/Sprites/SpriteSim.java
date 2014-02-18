@@ -2,7 +2,7 @@ package competition.uu2013.common.Sprites;
 
 import ch.idsia.benchmark.mario.engine.sprites.Sprite;
 
-public abstract class SpriteSim
+public class SpriteSim implements Cloneable
 {
     public static final float AIR_INERTIA = 0.85F;
     public static final float GROUND_INERTIA = 0.89F;
@@ -46,9 +46,16 @@ public abstract class SpriteSim
 
     }
 
-    public SpriteSim clone()
+    public SpriteSim clone() throws CloneNotSupportedException
     {
-         return this;
+        SpriteSim n = new SpriteSim();
+        n.x = this.x;
+        n.y = this.y;
+        n.xa = this.xa;
+        n.ya = this.ya;
+        n.facing = this.facing;
+        n.type = this.type;
+        return n;
     }
 
     public void move()

@@ -9,7 +9,7 @@ import competition.uu2013.common.Sprites.EnemySim;
  * Time: 14:17
  * To change this template use File | Settings | File Templates.
  */
-public class WaveSim extends EnemySim
+public class WaveSim extends EnemySim implements Cloneable
 {
 
     private float amplitude = 10f;
@@ -23,30 +23,14 @@ public class WaveSim extends EnemySim
         yaa = 2.0F;
     }
 
-    public WaveSim clone()
+    @Override
+    public WaveSim clone()  throws CloneNotSupportedException
     {
-        WaveSim n = new WaveSim(this.x, this.y, this.type);
-        n.x = this.x;
-        n.y = this.y;
-        n.ya = this.ya;
-        n.xa = this.xa;
-        n.facing = this.facing;
-        n.type = this.type;
-        n.lastX = this.lastX;
-        n.lastY = this.lastY;
-        n.height = this.height;
-        n.width = this.width;
-        n.avoidCliffs = this.avoidCliffs;
-        n.winged = this.winged;
-        n.onGround = this.onGround;
-        n.seen = this.seen;
-        n.flyDeath = this.flyDeath;
-        n.deadTime = this.deadTime;
-        n.dead = this.dead;
+        WaveSim n = (WaveSim) super.clone();
         n.amplitude = this.amplitude;
         n.lastSin = this.lastSin;
         n.sideWayCounter = this.sideWayCounter;
-        n.yaa =  this.yaa;
+        n.yaa = this.yaa;
         return n;
     }
 
