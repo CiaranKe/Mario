@@ -13,6 +13,8 @@ public class MarioSim  extends SpriteSim  implements Cloneable
     public float lastX,lastY;          // max speed = 4.85 walking, 9.7 running
     private boolean big = true;
     private boolean fire = true;
+    private boolean ducking = false;
+    private int width;
     private int invulnerableTime = 0;
     private int jumpTime;
     private int facing = 1;
@@ -52,6 +54,7 @@ public class MarioSim  extends SpriteSim  implements Cloneable
         lastY = y = _y;
         xa = _xa;
         ya = _ya;
+        width = 4;
         keys_last = new boolean[Environment.numberOfKeys];
     }
 
@@ -69,6 +72,7 @@ public class MarioSim  extends SpriteSim  implements Cloneable
         m.lastY = this.lastY;
         m.big = this.big;
         m.fire = this.fire;
+        m.width = this.width;
         m.invulnerableTime = this.invulnerableTime;
         m.jumpTime = this.jumpTime;
         m.facing = this.facing;
@@ -133,7 +137,6 @@ public class MarioSim  extends SpriteSim  implements Cloneable
     public void move()
     {
         keys_last = keys;
-        boolean ducking = false;
         float sideWaysSpeed = keys[KEY_SPEED]  ? 1.2f : 0.6f;
         this.oldX = x;
         this.oldY = y;
@@ -209,7 +212,7 @@ public class MarioSim  extends SpriteSim  implements Cloneable
 
         //if (keys[KEY_SPEED] && ableToShoot && this.fire && worldSim.numFireBalls() < 2)
         //{
-            //worldSim.addFireball(new FireBallSim(x + facing * 6, y - 20, Sprite.KIND_FIREBALL , facing));
+        //worldSim.addFireball(new FireBallSim(x + facing * 6, y - 20, Sprite.KIND_FIREBALL , facing));
         //}
 
         //ableToShoot = (worldSim.numFireBalls() < 2);
@@ -246,6 +249,7 @@ public class MarioSim  extends SpriteSim  implements Cloneable
         }
     }
 
+
     private boolean move(float xa, float ya)
     {
         while (xa > 8) {
@@ -269,8 +273,7 @@ public class MarioSim  extends SpriteSim  implements Cloneable
         }
 
         boolean collide = false;
-        int width = 4;
-        int height = big ? 24 : 12;
+
         if (ya > 0)
         {
             if (isBlocking(x + xa - width, y + ya, xa, 0)) collide = true;
@@ -280,16 +283,16 @@ public class MarioSim  extends SpriteSim  implements Cloneable
         }
         if (ya < 0)
         {
-            if (isBlocking(x + xa, y + ya - height, xa, ya)) collide = true;
-            else if (collide || isBlocking(x + xa - width, y + ya - height, xa, ya)) collide = true;
-            else if (collide || isBlocking(x + xa + width, y + ya - height, xa, ya)) collide = true;
+            if (isBlocking(x + xa, y + ya - this.height(), xa, ya)) collide = true;
+            else if (collide || isBlocking(x + xa - width, y + ya - height(), xa, ya)) collide = true;
+            else if (collide || isBlocking(x + xa + width, y + ya - height(), xa, ya)) collide = true;
         }
         if (xa > 0)
         {
             sliding = true;
-            if (isBlocking(x + xa + width, y + ya - height, xa, ya)) collide = true;
+            if (isBlocking(x + xa + width, y + ya - height(), xa, ya)) collide = true;
             else sliding = false;
-            if (isBlocking(x + xa + width, y + ya - height / 2, xa, ya)) collide = true;
+            if (isBlocking(x + xa + width, y + ya - height() / 2, xa, ya)) collide = true;
             else sliding = false;
             if (isBlocking(x + xa + width, y + ya, xa, ya)) collide = true;
             else sliding = false;
@@ -297,9 +300,9 @@ public class MarioSim  extends SpriteSim  implements Cloneable
         if (xa < 0)
         {
             sliding = true;
-            if (isBlocking(x + xa - width, y + ya - height, xa, ya)) collide = true;
+            if (isBlocking(x + xa - width, y + ya - height(), xa, ya)) collide = true;
             else sliding = false;
-            if (isBlocking(x + xa - width, y + ya - height / 2, xa, ya)) collide = true;
+            if (isBlocking(x + xa - width, y + ya - height() / 2, xa, ya)) collide = true;
             else sliding = false;
             if (isBlocking(x + xa - width, y + ya, xa, ya)) collide = true;
             else sliding = false;
@@ -316,7 +319,7 @@ public class MarioSim  extends SpriteSim  implements Cloneable
             }
 
             if (ya < 0) {
-                y = (int) ((y - height) / 16) * 16 + height;
+                y = (int) ((y - height()) / 16) * 16 + height();
                 jumpTime = 0;
                 this.ya = 0;
             } else if (ya > 0) {
@@ -335,39 +338,32 @@ public class MarioSim  extends SpriteSim  implements Cloneable
 
     private boolean isBlocking(float _x, float _y, float xa, float ya)
     {
-        int x = (int) (_x / 16); // block's quantized pos
+        int x = (int) (_x / 16);
         int y = (int) (_y / 16);
+        if (x == (int) (this.x / 16) && y == (int) (this.y / 16)) return false;
 
-        int Mx = (int) (this.x / 16); // reddit's quantized pos
-        int My = (int) (this.y / 16);
-        if (x == Mx && y == My) return false;
+        boolean blocking = map.isBlocking(x, y, ya);
 
-        boolean blocking = map.isBlocking(x,y);
-
-        byte block = map.getBlock(x,y);
-
-        if(block == 34) { // coin
+        byte block = map.getBlock(x, y);
 
 
-            map.setBlock(x,y,(byte)0);
-            return false;
+        if (((map.TILE_BEHAVIORS[block & 0xff]) & map.BIT_PICKUPABLE) > 0)
+        {
+            Mario.gainCoin();
+            map.setBlock(x, y, (byte) 0);
         }
-
-        //if (blocking && ya < 0)
-            //ws = ws.bump(x, y, big);
 
         if (blocking && ya < 0)
         {
             worldSim.bump(x, y, big);
         }
-
         return blocking;
     }
 
     public void stomp(SpriteSim enemy)
     {
-        System.out.println(" PREDICTED STOMP!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-        System.out.println("T: " + enemy.type + " X: " + enemy.x + " Y: " + enemy.y + "Height: " + enemy.height());
+        //System.out.println(" PREDICTED STOMP!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+        //System.out.println("T: " + enemy.type + " X: " + enemy.x + " Y: " + enemy.y + "Height: " + enemy.height());
 
         float targetY = enemy.y - enemy.height() / 2;
         move(0, targetY - y);
@@ -379,7 +375,7 @@ public class MarioSim  extends SpriteSim  implements Cloneable
         onGround = false;
         sliding = false;
         invulnerableTime = 1;
-        System.out.println("XA: " + xa + " YA: " + ya );
+        //System.out.println("XA: " + xa + " YA: " + ya );
     }
 
     public void stomp(boolean [] keys, final ShellSim shell)
@@ -405,6 +401,7 @@ public class MarioSim  extends SpriteSim  implements Cloneable
 
     public void getHurt()
     {
+        System.out.println("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!GOT HURT!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
         if (invulnerableTime > 0) return;
 
         if (big)
@@ -430,7 +427,7 @@ public class MarioSim  extends SpriteSim  implements Cloneable
         return this.dead;
     }
 
-    public void syncLocation(float _x, float _y, boolean _mayJump, boolean _onGround, boolean _fire, boolean _big)
+    public void syncLocation(float _x, float _y, boolean _mayJump, boolean _onGround, boolean _fire, int _big)
     {
         if ((_x != x)|| (_y !=y))
         {
@@ -443,8 +440,9 @@ public class MarioSim  extends SpriteSim  implements Cloneable
         this.mayJump = _mayJump;
         wasOnGround = onGround;
         this.onGround = _onGround;
-        this.big = _big;
-        this.fire = _fire;
+        this.big = (_big > 0);
+        this.fire = (_big == 2);
+        ableToShoot = _fire;
 
     }
 
@@ -521,5 +519,10 @@ public class MarioSim  extends SpriteSim  implements Cloneable
 
     public int getJumpTime() {
         return jumpTime;
+    }
+
+    public boolean mayJump()
+    {
+        return mayJump;
     }
 }

@@ -56,19 +56,6 @@ public class Action
         return actionList;
     }
 
-    public static boolean ignore(boolean[] action, WorldSim sim)
-    {
-
-        int x = (int) (sim.getMarioSim().getX() + sim.marioSim.getXA())/16;
-        int y = (int) sim.getMarioSim().getY() / 16;
-
-        //right with something in the way
-        if (action[Mario.KEY_RIGHT] && sim.getMap().isBlocking(x,y))
-        {
-            return true;
-        }
-        return false;
-    }
 
     private static boolean[] createAction(int action)
     {

@@ -72,7 +72,7 @@ public class Enemy implements Cloneable
         return false;
     }
 
-    public boolean setEnemies(float [] enemies, float marioX, float marioY)
+    public boolean setEnemies(float [] enemies, float marioX, float marioY, int sceneWidth)
     {
 
         /*
@@ -113,7 +113,7 @@ public class Enemy implements Cloneable
             for (SpriteSim sprite:enemiesList)
             {
                 //System.out.println("Sim: Type (" + Enemy.nameEnemy(sprite.getType()) + "):" + sprite.getType() + " X: " + sprite.getX() + " Y: " + sprite.getY() + " XA: " + ((EnemySim) sprite).getXA() + " YA: " + ((EnemySim) sprite).getYA() + " Facing" + ((EnemySim) sprite).getFacing());
-                // check if object is of same kind and close enough
+
                 if (sprite.getType() == newEnemy.getType()
                         && Math.abs(sprite.getX() - newEnemy.getX()) < maxDelta
                         && ((Math.abs(sprite.getY() - newEnemy.getY()) < maxDelta) || sprite.getType() == Sprite.KIND_ENEMY_FLOWER))
@@ -136,7 +136,7 @@ public class Enemy implements Cloneable
                         &&  Math.abs(sprite.getY() - newEnemy.getY()) < 8 && sprite.getType() != Sprite.KIND_SHELL &&
                         sprite.getType() != Sprite.KIND_BULLET_BILL && ((EnemySim) sprite).isWinged())
                 {
-                    // x accurate but y wrong. flying thing
+
 
                     ((EnemySim) sprite).setYA((newEnemy.getY() - ((EnemySim) sprite).getAccurateY()) * 0.95f + 0.6f); // / 0.89f;
                     ((EnemySim) sprite).setY(newEnemy.getY());
@@ -147,7 +147,7 @@ public class Enemy implements Cloneable
                 if (sprite.getType() == newEnemy.getType() && (sprite.getX() - newEnemy.getX()) == 0 && (sprite.getY() - newEnemy.getY()) != 0 &&
                         Math.abs(sprite.getY() - newEnemy.getY()) <= 2 && ((EnemySim)sprite).isYAUnknown() && ((EnemySim) sprite).getAccurateY() != 0)
                 {
-                    // should be not winged, falling down a cliff
+
                     ((EnemySim) sprite).setYA(newEnemy.getY() - ((EnemySim) sprite).getAccurateY() * 0.85f + 2); // / 0.89f;
                     ((EnemySim) sprite).setY(newEnemy.getY());
 
@@ -155,20 +155,32 @@ public class Enemy implements Cloneable
                     enemyFound = true;
                 }
 
+
+
                 if (enemyFound)
                 {
-                    //System.out.println("Updating!");
                     newSprites.add(sprite);
                     ((EnemySim) sprite).setAccurateX(newEnemy.getX());
                     ((EnemySim) sprite).setAccurateY(newEnemy.getY());
+
+                    if (newEnemiesFound && ((EnemySim) sprite).withinScope(marioX,marioY, sceneWidth))
+                    {
+                        System.out.println("LOST ENEMY SYNC!");
+                    }
+                    else
+                    {
+                        newEnemiesFound = false;
+                    }
+                    if (((EnemySim) sprite).newWithinScope(marioX,marioY,sceneWidth))
+                    {
+                        System.out.println("ENEMY IN SCOPE!");
+                    }
                     break;
                 }
             }
-            // didn't find a close enemy in our representation of the world,
-            // create a new one.
             if (!enemyFound)
             {
-                //System.out.println("Adding!");
+                System.out.println("NEW ENEMY!");
                 newEnemiesFound = true;
                     // Add new enemy to the system.
                 ((EnemySim)newEnemy).setXA(2);
@@ -179,12 +191,7 @@ public class Enemy implements Cloneable
         }
 
 
-        // add fireballs
-        for (SpriteSim sprite:newSprites)
-        {
-            if (sprite.getType() == Sprite.KIND_FIREBALL)
-                newSprites.add(sprite);
-        }
+
         enemiesList = newSprites;
         return newEnemiesFound;
 
@@ -386,6 +393,8 @@ public class Enemy implements Cloneable
                 return new WaveSim(_x, _y, _type);
             case Sprite.KIND_SHELL:
                 return new ShellSim(_x, _y, _type);
+            case Sprite.KIND_FIREBALL:
+                return new FireBallSim(_x,_y,_type, -1);
             default:
                 return new EnemySim(_x, _y, _type);
         }
@@ -429,6 +438,8 @@ public class Enemy implements Cloneable
                 return "Green mushroom";
             case Sprite.KIND_PRINCESS:
                 return "Princess";
+            case Sprite.KIND_FIREBALL:
+                return "Fireball";
         }
 
         return enemyName;

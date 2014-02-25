@@ -1,6 +1,7 @@
 package competition.uu2013;
 
 import ch.idsia.agents.Agent;
+import ch.idsia.benchmark.mario.engine.GlobalOptions;
 import ch.idsia.benchmark.mario.engine.sprites.Mario;
 import ch.idsia.benchmark.mario.environments.Environment;
 import competition.uu2013.common.level.Enemy;
@@ -17,6 +18,7 @@ public class TestingAgent extends MarioAIAgent implements Agent
 {
 
     private WorldSim worldSim;
+    private int jumpCounter =0;
     private float lastPredX = 32.0F;
     private float lastPredY = 35.0F;
 
@@ -46,14 +48,16 @@ public class TestingAgent extends MarioAIAgent implements Agent
         {
             worldSim = new WorldSim(new MarioSim(marioFloatPos[0],marioFloatPos[1], 0.0F, 3.0F), new Enemy(), new Map());
             worldSim.move(action, marioFloatPos[0], marioFloatPos[1]);
-            worldSim.syncLocation(marioFloatPos[0], marioFloatPos[1], isMarioAbleToJump, isMarioOnGround, isMarioAbleToShoot, (marioStatus == 1), this.enemiesFloatPos, this.levelScene);
+            worldSim.syncLocation(marioFloatPos[0], marioFloatPos[1], isMarioAbleToJump, isMarioOnGround, isMarioAbleToShoot, marioStatus, this.enemiesFloatPos, this.levelScene);
         }
         else
         {
             worldSim.move(action, marioFloatPos[0], marioFloatPos[1]);
             lastPredX = worldSim.getMarioLocation()[0];
             lastPredY = worldSim.getMarioLocation()[1];
-            worldSim.syncLocation(marioFloatPos[0], marioFloatPos[1], isMarioAbleToJump, isMarioOnGround, isMarioAbleToShoot, (marioStatus == 1), this.enemiesFloatPos, this.levelScene);
+            worldSim.syncLocation(marioFloatPos[0], marioFloatPos[1], isMarioAbleToJump, isMarioOnGround, isMarioAbleToShoot, marioStatus, this.enemiesFloatPos, this.levelScene);
+
+            //Map.printMap(worldSim.getMap());
 
             boolean synced = true;
 
@@ -114,6 +118,9 @@ public class TestingAgent extends MarioAIAgent implements Agent
                 action[Mario.KEY_JUMP] = isMarioAbleToJump || !isMarioOnGround;
                 action[Mario.KEY_SPEED] = isMarioOnGround;
                 action[Mario.KEY_RIGHT] = true;
+            if (action[Mario.KEY_JUMP]) jumpCounter++;
+            else jumpCounter = 0;
+            System.out.println("A: Able: "+ GlobalOptions.mario.mayJump() +", S: Able: " + worldSim.getMarioSim().mayJump() +", Jumping: " + action[Mario.KEY_JUMP] + ", True Jump Counter:" + jumpCounter + ", Simmed JC: " + worldSim.getMarioSim().getJumpTime() + ", AJC: " + GlobalOptions.mario.getJumpTime());
 
             if (!synced)
             {

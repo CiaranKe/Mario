@@ -35,6 +35,7 @@ public class EnemySim extends SpriteSim implements Comparable
     protected float oldX;
     protected float oldY;
     protected Map map;
+    protected boolean alreadyInScope;
 
     public EnemySim(float _x, float _y, int _type )
     {
@@ -50,11 +51,12 @@ public class EnemySim extends SpriteSim implements Comparable
         this.flyDeath = false;
         this.avoidCliffs = false;
         this.width = 4;
-        this.height = 24;
+        this.height = 12;
         this.facing = -1;
         this.seen = false;
         this.noFireballDeath = false;
         this.accurateY = 0;
+        this.alreadyInScope = false;
 
         switch (this.type)
         {
@@ -118,6 +120,7 @@ public class EnemySim extends SpriteSim implements Comparable
         n.firstMove = this.firstMove;
         n.oldX = this.oldX;
         n.oldY = this.oldY;
+        n.alreadyInScope = this.alreadyInScope;
         return n;
     }
 
@@ -325,7 +328,7 @@ public class EnemySim extends SpriteSim implements Comparable
             if (isBlocking(x + xa + width, y + ya - height / 2, xa, ya)) collide = true;
             if (isBlocking(x + xa + width, y + ya, xa, ya)) collide = true;
 
-            if (avoidCliffs && onGround && !map.isBlocking((int) ((x + xa + width) / 16), (int) ((y) / 16 + 1)))
+            if (avoidCliffs && onGround && !map.isBlocking((int) ((x + xa + width) / 16), (int) ((y) / 16 + 1),ya))
                 collide = true;
         }
         if (xa < 0)
@@ -334,7 +337,7 @@ public class EnemySim extends SpriteSim implements Comparable
             if (isBlocking(x + xa - width, y + ya - height / 2, xa, ya)) collide = true;
             if (isBlocking(x + xa - width, y + ya, xa, ya)) collide = true;
 
-            if (avoidCliffs && onGround && !map.isBlocking((int) ((x + xa - width) / 16), (int) ((y) / 16 + 1)))
+            if (avoidCliffs && onGround && !map.isBlocking((int) ((x + xa - width) / 16), (int) ((y) / 16 + 1),ya))
                 collide = true;
         }
 
@@ -376,7 +379,7 @@ public class EnemySim extends SpriteSim implements Comparable
         int y = (int) (_y / 16);
         if (x == (int) (this.x / 16) && y == (int) (this.y / 16)) return false;
 
-        boolean blocking = map.isBlocking(x, y);
+        boolean blocking = map.isBlocking(x, y, ya);
 
 //        byte block = levelScene.level.getBlock(x, y);
 
@@ -472,7 +475,8 @@ public class EnemySim extends SpriteSim implements Comparable
         }
     }
 
-    public boolean fireballCollideCheck(FireBallSim fireball)
+    @Override
+    public boolean checkFireballCollide(FireBallSim fireball)
     {
         if (deadTime != 0)
         {
@@ -526,35 +530,6 @@ public class EnemySim extends SpriteSim implements Comparable
         }
     }
 
-    public boolean checkFireballCollide(FireBallSim fireBallSim)
-    {
-        if (deadTime != 0)
-        {
-            return false;
-        }
-
-        float xD = fireBallSim.x - x;
-        float yD = fireBallSim.y - y;
-
-        if (xD > -16 && xD < 16)
-        {
-            if (yD > -height && yD < fireBallSim.height)
-            {
-                if (noFireballDeath)
-                {
-                    return false;
-                }
-
-                xa = fireBallSim.facing * 2;
-                ya = -5;
-                flyDeath = true;
-                deadTime = 100;
-                winged = false;
-                return true;
-            }
-        }
-        return false;
-    }
 
     public void setFacing(int _facing)
     {
@@ -609,5 +584,31 @@ public class EnemySim extends SpriteSim implements Comparable
     public float getAccurateX()
     {
         return accurateX;
+    }
+
+    public boolean newWithinScope(float marioX, float marioY, int sceneWidth)
+    {
+        if (!alreadyInScope)
+        {
+            if(this.withinScope(marioX, marioY, sceneWidth))
+            {
+                this.alreadyInScope = true;
+            }
+        }
+        return !alreadyInScope;
+    }
+
+    public boolean withinScope(float marioX, float marioY, int sceneWidth)
+    {
+        float scopeXForwardDistance = marioX + (sceneWidth * 16);
+        float scopeXBehindDistance = marioX + (sceneWidth * 16);
+        float scopeYLowerDistance = marioY + (sceneWidth * 16);
+        float scopeYUpperDistance = marioY - (sceneWidth * 16);
+
+        if (this.x < scopeXForwardDistance && this.x > scopeXBehindDistance && this.y > scopeYLowerDistance && this.y < scopeYUpperDistance)
+        {
+            return true;
+        }
+        return false;
     }
 }

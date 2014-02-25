@@ -3,6 +3,7 @@ package competition.uu2013.prototypes;
 import ch.idsia.benchmark.mario.engine.sprites.Mario;
 import ch.idsia.benchmark.mario.environments.Environment;
 import competition.uu2013.common.level.Map;
+import competition.uu2013.common.level.WorldSim;
 
 import java.util.ArrayList;
 
@@ -25,11 +26,12 @@ public class Action
     public static final int ACTION_COUNT = 9;
 
 
-    public static ArrayList<boolean[]> getPossibleActions(boolean mayJump, float marioX, float marioY, Map map)
+    public static ArrayList<boolean[]> getPossibleActions(WorldSim sim)
     {
         ArrayList<boolean[]> actionList = new ArrayList<boolean[]>();
 
-        if (mayJump)
+
+        if (sim.getMarioSim().mayJump() || sim.getMarioSim().getJumpTime() > 0)
         {
             actionList.add(createAction(Action.JUMP));
             actionList.add(createAction(Action.JUMP_SPEED));
@@ -38,16 +40,11 @@ public class Action
             actionList.add(createAction(Action.RIGHT_JUMP));
             actionList.add(createAction(Action.RIGHT_JUMP_SPEED));
         }
-        if (map.getViewAt(marioX + Map.CELL_SIZE, marioY) == 0)
-        {
-            actionList.add(createAction(Action.RIGHT));
-            actionList.add(createAction(Action.RIGHT_SPEED));
-        }
-        if (map.getViewAt(marioX - Map.CELL_SIZE, marioY) == 0)
-        {
-            actionList.add(createAction(Action.LEFT));
-            actionList.add(createAction(Action.LEFT_SPEED));
-        }
+
+        actionList.add(createAction(Action.RIGHT));
+        actionList.add(createAction(Action.RIGHT_SPEED));
+        actionList.add(createAction(Action.LEFT));
+        actionList.add(createAction(Action.LEFT_SPEED));
         return actionList;
     }
 

@@ -16,7 +16,7 @@ public class WorldSim implements Cloneable
     {
         this.marioSim = _marioSim;
         this.enemySims = _enemySims;
-        this.mapSim= _mapSim;
+        this.mapSim = _mapSim;
         this.marioSim.setWorldSim(this);
         this.marioSim.setMapSim(this.mapSim);
     }
@@ -76,9 +76,7 @@ public class WorldSim implements Cloneable
         for (SpriteSim e: allSims)
         {
             e.collideCheck();
-        }
-        for (SpriteSim e: allSims)
-        {
+
             if (e instanceof ShellSim)
             {
                 this.checkShellCollide((ShellSim)e, allSims);
@@ -153,13 +151,13 @@ public class WorldSim implements Cloneable
         return new float[] {marioSim.getX(), marioSim.getY()};
     }
 
-    public boolean syncLocation(float x, float y, boolean isMarioAbleToJump, boolean isMarioOnGround, boolean isMarioAbleToShoot, boolean marioStatus, float [] newEnemies, byte [][] scene)
+    public boolean syncLocation(float x, float y, boolean isMarioAbleToJump, boolean isMarioOnGround, boolean isMarioAbleToShoot, int marioStatus, float [] newEnemies, byte [][] scene)
     {
         boolean newEnemy;
 
         this.marioSim.syncLocation(x, y, isMarioAbleToJump, isMarioOnGround, isMarioAbleToShoot, marioStatus);
         this.mapSim.setScene(scene,x,y);
-        newEnemy = this.enemySims.setEnemies(newEnemies,x,y);
+        newEnemy = this.enemySims.setEnemies(newEnemies,x,y, (scene[0].length / 2));
 
 
 
@@ -170,7 +168,7 @@ public class WorldSim implements Cloneable
             ((EnemySim)sim).setMapSim(this.mapSim);
         }
 
-        return newEnemy || !(marioSim.isOnGround() == isMarioOnGround) || !(marioSim.isMarioAbletoJump() == isMarioAbleToJump);
+        return newEnemy;
     }
 
     public Object getMarioXA() {

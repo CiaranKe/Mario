@@ -56,7 +56,7 @@ public class Map implements Cloneable
     }
 
 
-    public  byte getViewAt(float x, float y)
+    public byte getViewAt(float x, float y)
     {
         int marioX = (int) x / Map.CELL_SIZE;
         int marioY = (int) y / Map.CELL_SIZE;
@@ -169,17 +169,16 @@ public class Map implements Cloneable
         map[x][y] = b;
     }
 
-    public boolean isBlocking(int x, int y)
+    public boolean isBlocking(int x, int y, float ya)
     {
 
         byte block = getBlock(x, y);
+        boolean blocking = ((TILE_BEHAVIORS[block & 0xff]) & BIT_BLOCK_ALL) > 0;
+        blocking |= (ya > 0) && ((TILE_BEHAVIORS[block & 0xff]) & BIT_BLOCK_UPPER) > 0;
+        blocking |= (ya < 0) && ((TILE_BEHAVIORS[block & 0xff]) & BIT_BLOCK_LOWER) > 0;
 
-        if (block == 2)
-        {
-            return false;
-        }
 
-        return block != 0;
+        return blocking;
     }
 
     private static void loadTiles()

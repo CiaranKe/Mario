@@ -32,6 +32,7 @@ public class AStarSearchAttempt1
 
     public boolean [] pathFind(float x, float y, long remainingTime)
     {
+        /*
         long time = System.currentTimeMillis();
         boolean rePlan = rePlanLostSync || rePlanNewEnemy || !(plan.size() > 0);
 
@@ -71,10 +72,13 @@ public class AStarSearchAttempt1
             this.extractPlan(furthest);
         }
         return plan.pop();
+        */
+        return null;
     }
 
     public void extractPlan(SearchNode _current)
     {
+        /*
         while (_current != null)
         {
             if (_current.getParent() == null)
@@ -86,9 +90,10 @@ public class AStarSearchAttempt1
             _current = _current.getParent();
         }
         System.out.println();
+        */
     }
 
-    public void updateSim(float x, float y, boolean isMarioAbleToJump, boolean isMarioOnGround, boolean isMarioAbleToShoot, boolean marioStatus, float [] newEnemies, byte [][] scene, boolean [] _lastAction)
+    public void updateSim(float x, float y, boolean isMarioAbleToJump, boolean isMarioOnGround, boolean isMarioAbleToShoot, int marioStatus, float [] newEnemies, byte [][] scene, boolean [] _lastAction)
     {
 
         this.sceneWidth = scene[0].length / 2;

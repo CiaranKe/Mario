@@ -1,10 +1,12 @@
 package competition.uu2013.common.hueristics;
 
 import competition.uu2013.common.Sprites.MarioSim;
+import competition.uu2013.common.Sprites.SpriteSim;
 import competition.uu2013.common.level.WorldSim;
 import competition.uu2013.prototypes.Action;
 
 import java.util.ArrayList;
+import java.util.EmptyStackException;
 import java.util.Stack;
 
 /**
@@ -16,125 +18,142 @@ import java.util.Stack;
  */
 public class AStarSearch
 {
-    private final static int TICKS_TO_PLAN = 2;
-    private ArrayList<SearchNode> closed;
-    private SortedList<SearchNode> open;
-    private Stack<boolean []> plan;
-    private SearchNode working;
+
     private boolean rePlanNewEnemy;
     private boolean rePlanLostSync;
     private int sceneWidth;
     private int sceneHeight;
+    private SortedList<SearchNode> openList;
+    private SortedList<SearchNode> closedList;
+    private Stack<boolean[]> plan;
+    private SearchNode working;
 
-
-    public AStarSearch(WorldSim _sim)
+    public AStarSearch(WorldSim sim)
     {
-        this.open = new SortedList<SearchNode>();
-        this.closed = new ArrayList<SearchNode>();
+        this.working = new SearchNode(1,sim);
+        this.openList = new SortedList<SearchNode>();
+        this.closedList = new SortedList<SearchNode>();
         this.plan = new Stack<boolean[]>();
-        this.working = new SearchNode(1,null,_sim);
-        this.sceneWidth = 11;
-        this.sceneHeight = 11;
     }
 
 
-    public boolean [] pathFind(float x, float y, long startTime)
-    {
+    //TODO: Block parent that caused us to get hurt.
 
-        if (rePlanLostSync || rePlanNewEnemy || plan.empty())
+
+    public boolean[] pathFind(float _x, float _y, long startTime)
+    {
+        if (rePlanNewEnemy || rePlanLostSync || plan.empty())
         {
             System.out.println("Lost Sync: "+rePlanLostSync+", New Enemy: "+rePlanNewEnemy+", Empty plan: "+plan.empty());
-            open.clear();
-            closed.clear();
-            plan.clear();
-            open.add(working);
-            SearchNode current = working;
-            SearchNode best = working;
-            SearchNode furthest = working;
-            working.setGoal(x,y);
-            working.estimateCost();
 
-            System.out.println("Goal is: " +(x + ((11 * 16)-16)));
-            System.out.println("Open size: " + open.size()+ ", Found goal: " + current.isGoal() + ", Time left: " + (40 - (System.currentTimeMillis() - startTime)) );
-            while ((open.size() != 0 && !current.isGoal()) )
+            int loopCounter = 1;
+            openList.clear();
+            closedList.clear();
+            plan.clear();
+            working.setGCost(0);
+            working.setGoal(_x, _y, sceneWidth, sceneHeight);
+            openList.add(working);
+            SearchNode.resetCounter();
+            SearchNode current = null;
+            SearchNode farthest = working;
+
+            System.out.println("Goal was: " + (_x+(sceneWidth * 16)));
+
+            while (openList.size() != 0  && (System.currentTimeMillis() - startTime) < 39)
             {
-                System.out.println("Open size: " + open.size()+ ", Found goal: " + current.isGoal() + ", Time left: " + (40 - (System.currentTimeMillis() - startTime)) );
-                if (open.size() > 20)
+                current = openList.getFirst();
+                try
                 {
-                    open.prune(20);
+                    System.out.println("Node:"+ current.getID() + ", Parent: "+ current.getParent().getID() + ", Score: " + current.getGCost()+","+current.getHCost()+","+current.getFCost() +  ", Action"+ Action.nameAction(current.getAction()) + ", Blocked: " + current.isBlocked() + ", Goal: " + current.getGoal() +", X: " + current.getPredictedXY()[0]);
                 }
-                current = open.getFirst();
-                open.remove(current);
-                closed.add(current);
-                for (SearchNode n : current.generateNeighbors(x,y))
+                catch (NullPointerException e)
                 {
-                    if (this.isVisted(n))
+                    System.out.println("Node:"+ current.getID() + ", Score: " + current.getFCost() +  ", Action"+ Action.nameAction(current.getAction()) + ", Goal: " + current.getGoal() +", X: " + current.getPredictedXY()[0]);
+                }
+
+
+                if (current.isGoal())
+                {
+                    System.out.println("Ran " + loopCounter + " Iterations, open size: " + openList.size() + ", Time taken: " + (System.currentTimeMillis() - startTime));
+                    this.extractPlan(current);
+                    return plan.pop();
+                }
+
+                openList.remove(current);
+                closedList.add(current);
+
+                for (SearchNode n : current.generateChildren(_x,_y,sceneWidth,sceneHeight))
+                {
+                    boolean isBetter;
+
+                    if (closedList.contains(n))
                     {
-                        open.remove(n);
-                        closed.add(n);
+                        continue;
                     }
-                    else
+                    if (!n.isBlocked())
                     {
-                        if (!open.contains(n))
+                        if (!openList.contains(n))
                         {
-                            open.add(n);
+                            openList.add(n);
+                            isBetter = true;
                         }
-                        if ((n.getCost() > best.getCost()) || (n.getCost() >= best.getCost() && n.getMarioSim().getX() > best.getMarioSim().getX()) )
+                        else if (n.getFCost() < current.getFCost())
                         {
-                            best = n;
+                            isBetter = true;
                         }
-                        if (n.getMarioSim().getX() > furthest.getMarioSim().getX())
+                        else
                         {
-                            furthest = n;
+                            isBetter = false;
+                        }
+                        if (isBetter)
+                        {
+                            n.setParent(current);
+                            n.setGCost(current.getGCost());
+                            n.estimateHCost();
+                        }
+
+                        if (farthest.getPredictedXY()[0] > current.getPredictedXY()[0])
+                        {
+                            farthest = current;
                         }
                     }
                 }
-                System.out.println("==================================== Open size: " + open.size());
+                loopCounter++;
             }
 
-            if (!best.isGoal() || !current.isGoal())
+            if (!current.isGoal())
             {
-                best = furthest;
                 System.out.println("Didn't find goal");
             }
-            this.extractPlan(best);
+            System.out.println("Ran " + loopCounter + " Iterations, open size: " + openList.size() + ", Time taken: " + (System.currentTimeMillis() - startTime));
         }
-        System.out.println("==================================== Plan size: " + plan.size());
-        return plan.pop();
+        try
+        {
+            return plan.pop();
+        }
+        catch (EmptyStackException e)
+        {
+            return new boolean[6];
+        }
     }
 
-    private boolean isVisted(SearchNode n)
+    private void extractPlan(SearchNode current)
     {
-        int diff = 2;
-
-        for (SearchNode c : closed)
+        System.out.print("Plan: ");
+        while (current != null)
         {
-            if ((Math.abs(n.getMarioSim().getX() - c.getMarioSim().getX()) < diff)&&(Math.abs(n.getMarioSim().getY() - c.getMarioSim().getY()) < diff))
-            {
-                return true;
-            }
-        }
-        return false;
-    }
-
-
-    public void extractPlan(SearchNode _current)
-    {
-        while (_current != null)
-        {
-            if (_current.getParent() == null)
+            if (current.getParent() == null)
             {
                 break;
             }
-            System.out.print("Adding " + Action.nameAction(_current.getAction()) + " Score: " + _current.getCost() + ", ");
-            plan.push(_current.getAction());
-            _current = _current.getParent();
+            plan.push(current.getAction());
+            System.out.print(Action.nameAction(current.getAction()) + ",");
+            current = current.getParent();
         }
-        System.out.println();
     }
 
 
-    public void updateSim(float x, float y, boolean isMarioAbleToJump, boolean isMarioOnGround, boolean isMarioAbleToShoot, boolean marioStatus, float [] newEnemies, byte [][] scene, boolean [] _lastAction)
+    public void updateSim(float x, float y, boolean isMarioAbleToJump, boolean isMarioOnGround, boolean isMarioAbleToShoot, int marioStatus, float [] newEnemies, byte [][] scene, boolean [] _lastAction)
     {
 
         this.sceneWidth = scene[0].length / 2;
@@ -152,14 +171,18 @@ public class AStarSearch
         }
     }
 
-    public boolean withinScope(float marioX, MarioSim sim)
+    public float getPredictedX()
     {
-        float lookAHead = marioX + (sceneWidth * 16);
+        return working.getPredictedXY()[0];
+    }
 
-        if ((sim.getX() < lookAHead))
-        {
-            return true;
-        }
-        return false;
+    public float getPredictedY()
+    {
+        return working.getPredictedXY()[1];
+    }
+
+    public ArrayList<SpriteSim> getEnemySims() throws CloneNotSupportedException
+    {
+        return working.getEnemySims();
     }
 }

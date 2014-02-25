@@ -3,15 +3,10 @@ package competition.uu2013.common.hueristics;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Iterator;
 
-/**
- * Created with IntelliJ IDEA.
- * User: fluffy
- * Date: 17/02/14
- * Time: 13:58
- * To change this template use File | Settings | File Templates.
- */
-public class SortedList<T extends Comparable<T>>
+
+public class SortedList<T extends SortedListItem<T>>  implements Iterable<T>
 {
     private ArrayList<T> list;
 
@@ -48,7 +43,22 @@ public class SortedList<T extends Comparable<T>>
 
     public boolean contains(T element)
     {
-        return list.contains(element);
+
+        if (list.contains(element))
+        {
+            return true;
+        }
+
+        for ( T t : list)
+        {
+            if (t.matches(element))
+            {
+                list.add(element);
+                return true;
+            }
+        }
+
+        return false;
     }
 
     public ArrayList<T> getList()
@@ -65,6 +75,11 @@ public class SortedList<T extends Comparable<T>>
         }
     }
 
+    @Override
+    public Iterator<T> iterator() {
+        return list.iterator();
+    }
+
     class SortedListComparator implements Comparator<T>
     {
 
@@ -74,5 +89,4 @@ public class SortedList<T extends Comparable<T>>
             return o1.compareTo(o2);
         }
     }
-
 }

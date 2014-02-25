@@ -1,13 +1,10 @@
 package competition.uu2013.astartester;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Stack;
+import java.util.*;
 
 public class AStar
 {
-    private byte [][] map;
+    private int [][] map;
     private int xLoc;
     private int yLoc;
     private int targetX;
@@ -34,17 +31,17 @@ public class AStar
         closed = new SortedList<Node>();
         plan = new Stack<Node>();
 
-        map = new byte[10][];
-        map[0] = new byte[]{1,1,1,1,1,1,1,1,1,1};
-        map[1] = new byte[]{1,0,0,0,0,0,0,0,0,1};
-        map[2] = new byte[]{1,0,0,0,0,0,1,1,1,1};
-        map[3] = new byte[]{1,1,1,1,1,0,0,0,0,1};
-        map[4] = new byte[]{1,0,0,0,1,0,0,0,0,1};
-        map[5] = new byte[]{1,0,0,0,1,0,0,0,0,1};
-        map[6] = new byte[]{1,0,0,0,1,0,0,1,1,1};
-        map[7] = new byte[]{1,0,0,1,1,0,0,0,0,1};
-        map[8] = new byte[]{1,0,0,0,0,0,0,1,1,1};
-        map[9] = new byte[]{1,1,1,1,1,1,1,1,1,1};
+        map = new int[10][];
+        map[0] = new int[]{1,1,1,1,1,1,1,1,1,1};
+        map[1] = new int[]{1,0,0,0,0,0,0,0,0,1};
+        map[2] = new int[]{1,0,0,0,0,0,1,1,1,1};
+        map[3] = new int[]{1,1,1,1,1,0,0,0,0,1};
+        map[4] = new int[]{1,0,0,0,1,0,0,0,0,1};
+        map[5] = new int[]{1,0,0,0,1,0,0,0,0,1};
+        map[6] = new int[]{1,0,0,0,1,0,0,1,1,1};
+        map[7] = new int[]{1,0,0,1,1,0,0,0,0,1};
+        map[8] = new int[]{1,0,0,0,0,0,0,1,1,1};
+        map[9] = new int[]{1,1,1,1,1,1,1,1,1,1};
     }
 
     private boolean search() {
@@ -187,8 +184,8 @@ class Node implements Matches<Node>
     }
 
 
-    public ArrayList<Node> generateChildren(byte[][] _map) {
-        ArrayList<Node> children = new ArrayList<Node>();
+    public SortedList<Node> generateChildren(int[][] _map) {
+        SortedList<Node> children = new SortedList<Node>();
 
         for (int y = yLoc - 1; y <= yLoc + 1; y++)
         {
@@ -253,7 +250,7 @@ class Node implements Matches<Node>
     }
 }
 
-class SortedList<T extends Matches<T>>
+class SortedList<T extends Matches<T>> implements Iterable<T>
 {
     private ArrayList<T> list;
     private T node;
@@ -318,6 +315,12 @@ class SortedList<T extends Matches<T>>
     public void addAll(ArrayList<T> nodes)
     {
         list.addAll(nodes);
+    }
+
+    @Override
+    public Iterator iterator()
+    {
+        return list.iterator();
     }
 
     class SortedListComparator implements Comparator<T>

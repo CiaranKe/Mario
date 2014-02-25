@@ -19,19 +19,43 @@ public class FireBallSim extends EnemySim implements Cloneable
     {
         super(_x, _y, _type);
 
-        this.x = x;
-        this.y = y;
+        this.x = _x;
+        this.y = _y;
 
         height = 8;
-        ya = 4;
+        ya = 5.3F;
+        xa = 7.12F;
         facing = dir;
     }
 
     @Override
     public FireBallSim clone() throws CloneNotSupportedException
     {
-        FireBallSim n = (FireBallSim) super.clone();
-
+        FireBallSim n = new FireBallSim(this.x, this.y, this.type, this.facing);
+        n.x = this.x;
+        n.y = this.y;
+        n.xa = this.xa;
+        n.ya = this.ya;
+        n.facing = this.facing;
+        n.type = this.type;
+        n.lastX = this.lastX;
+        n.lastY = this.lastY;
+        n.height = this.height;
+        n.width = this.width;
+        n.avoidCliffs = this.avoidCliffs;
+        n.winged = this.winged;
+        n.onGround = this.onGround;
+        n.seen = this.seen;
+        n.flyDeath = this.flyDeath;
+        n.deadTime = this.deadTime;
+        n.noFireballDeath = this.noFireballDeath;
+        n.dead = this.dead;
+        n.accurateY = this.accurateY;
+        n.accurateX = this.accurateX;
+        n.yaUnknown = this.yaUnknown;
+        n.firstMove = this.firstMove;
+        n.oldX = this.oldX;
+        n.oldY = this.oldY;
         return n;
     }
 
@@ -90,8 +114,6 @@ public class FireBallSim extends EnemySim implements Cloneable
         {
             ya += 1.5;
         }
-
-        System.out.println("Simmed Fireball: X:" + x + " Y: " + y );
     }
 
     public boolean move(float xa, float ya)
@@ -137,7 +159,7 @@ public class FireBallSim extends EnemySim implements Cloneable
             if (isBlocking(x + xa + width, y + ya - height / 2, xa, ya)) collide = true;
             if (isBlocking(x + xa + width, y + ya, xa, ya)) collide = true;
 
-            if (avoidCliffs && onGround && !map.isBlocking((int) ((x + xa + width) / 16), (int) ((y) / 16 + 1)))
+            if (avoidCliffs && onGround && !map.isBlocking((int) ((x + xa + width) / 16), (int) ((y) / 16 + 1),ya))
                 collide = true;
         }
         if (xa < 0)
@@ -146,7 +168,7 @@ public class FireBallSim extends EnemySim implements Cloneable
             if (isBlocking(x + xa - width, y + ya - height / 2, xa, ya)) collide = true;
             if (isBlocking(x + xa - width, y + ya, xa, ya)) collide = true;
 
-            if (avoidCliffs && onGround && !map.isBlocking((int) ((x + xa - width) / 16), (int) ((y) / 16 + 1)))
+            if (avoidCliffs && onGround && !map.isBlocking((int) ((x + xa - width) / 16), (int) ((y) / 16 + 1),ya))
                 collide = true;
         }
 
@@ -187,7 +209,7 @@ public class FireBallSim extends EnemySim implements Cloneable
         int y = (int) (_y / 16);
         if (x == (int) (this.x / 16) && y == (int) (this.y / 16)) return false;
 
-        boolean blocking = map.isBlocking(x, y);
+        boolean blocking = map.isBlocking(x, y,ya);
 
         byte block = map.getBlock(x, y);
 
@@ -201,6 +223,11 @@ public class FireBallSim extends EnemySim implements Cloneable
         xa = -facing * 2;
         ya = -5;
         deadTime = 100;
-        System.out.println("Simmed Fireball died!");
+    }
+
+    @Override
+    public boolean checkFireballCollide(FireBallSim fireBallSim)
+    {
+        return false;
     }
 }

@@ -22,7 +22,32 @@ public class ShellSim extends EnemySim implements Cloneable
     @Override
     public ShellSim clone() throws CloneNotSupportedException
     {
-        ShellSim n = (ShellSim) super.clone();
+        ShellSim n = new ShellSim(this.x,this.y, this.type);
+        n.x = this.x;
+        n.y = this.y;
+        n.xa = this.xa;
+        n.ya = this.ya;
+        n.facing = this.facing;
+        n.type = this.type;
+        n.lastX = this.lastX;
+        n.lastY = this.lastY;
+        n.height = this.height;
+        n.width = this.width;
+        n.avoidCliffs = this.avoidCliffs;
+        n.winged = this.winged;
+        n.onGround = this.onGround;
+        n.seen = this.seen;
+        n.flyDeath = this.flyDeath;
+        n.deadTime = this.deadTime;
+        n.noFireballDeath = this.noFireballDeath;
+        n.dead = this.dead;
+        n.accurateY = this.accurateY;
+        n.accurateX = this.accurateX;
+        n.yaUnknown = this.yaUnknown;
+        n.firstMove = this.firstMove;
+        n.oldX = this.oldX;
+        n.oldY = this.oldY;
+        n.alreadyInScope = this.alreadyInScope;
         n.yaa = this.yaa;
         n.carried = this.carried;
         return n;
@@ -206,7 +231,7 @@ public class ShellSim extends EnemySim implements Cloneable
             if (isBlocking(x + xa + width, y + ya - height / 2, xa, ya)) collide = true;
             if (isBlocking(x + xa + width, y + ya, xa, ya)) collide = true;
 
-            if (avoidCliffs && onGround && !map.isBlocking((int) ((x + xa + width) / 16), (int) ((y) / 16 + 1)))
+            if (avoidCliffs && onGround && !map.isBlocking((int) ((x + xa + width) / 16), (int) ((y) / 16 + 1),ya))
                 collide = true;
         }
         if (xa < 0)
@@ -215,7 +240,7 @@ public class ShellSim extends EnemySim implements Cloneable
             if (isBlocking(x + xa - width, y + ya - height / 2, xa, ya)) collide = true;
             if (isBlocking(x + xa - width, y + ya, xa, ya)) collide = true;
 
-            if (avoidCliffs && onGround && !map.isBlocking((int) ((x + xa - width) / 16), (int) ((y) / 16 + 1)))
+            if (avoidCliffs && onGround && !map.isBlocking((int) ((x + xa - width) / 16), (int) ((y) / 16 + 1),ya))
                 collide = true;
         }
 
@@ -256,7 +281,7 @@ public class ShellSim extends EnemySim implements Cloneable
         int y = (int) (_y / 16);
         if (x == (int) (this.x / 16) && y == (int) (this.y / 16)) return false;
 
-        boolean blocking = map.isBlocking(x, y);
+        boolean blocking = map.isBlocking(x, y,ya);
 
 //        byte block = levelScene.level.getBlock(x, y);
 

@@ -135,7 +135,7 @@ public class MushroomSim extends EnemySim implements Cloneable
             if (isBlocking(x + xa + width, y + ya - height / 2, xa, ya)) collide = true;
             if (isBlocking(x + xa + width, y + ya, xa, ya)) collide = true;
 
-            if (avoidCliffs && onGround && !map.isBlocking((int) ((x + xa + width) / 16), (int) ((y) / 16 + 1)))
+            if (avoidCliffs && onGround && !map.isBlocking((int) ((x + xa + width) / 16), (int) ((y) / 16 + 1),ya))
                 collide = true;
         }
         if (xa < 0)
@@ -144,7 +144,7 @@ public class MushroomSim extends EnemySim implements Cloneable
             if (isBlocking(x + xa - width, y + ya - height / 2, xa, ya)) collide = true;
             if (isBlocking(x + xa - width, y + ya, xa, ya)) collide = true;
 
-            if (avoidCliffs && onGround && !map.isBlocking((int) ((x + xa - width) / 16), (int) ((y) / 16 + 1)))
+            if (avoidCliffs && onGround && !map.isBlocking((int) ((x + xa - width) / 16), (int) ((y) / 16 + 1),ya))
                 collide = true;
         }
 
@@ -186,7 +186,7 @@ public class MushroomSim extends EnemySim implements Cloneable
         int y = (int) (_y / 16);
         if (x == (int) (this.x / 16) && y == (int) (this.y / 16)) return false;
 
-        boolean blocking = map.isBlocking(x, y);
+        boolean blocking = map.isBlocking(x, y,ya);
 
         byte block = map.getBlock(x, y);
 
