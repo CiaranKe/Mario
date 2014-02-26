@@ -20,8 +20,8 @@ public class SearchNode implements SortedListItem<SearchNode>
     private float predY;
     private int gCost;
     private float hCost;
-    private float goalX;
-    private float goalY;
+    private static float goalX;
+
     private SearchNode parent;
     private boolean blocked;
     private int id;
@@ -30,6 +30,7 @@ public class SearchNode implements SortedListItem<SearchNode>
     {
         idCounter =1;
     }
+
 
     public SearchNode(int _id, WorldSim _sim)
     {
@@ -84,12 +85,6 @@ public class SearchNode implements SortedListItem<SearchNode>
     {
         return (this.sim.getMarioSim().getX() > this.goalX);
     }
-
-    public void setGoal(float _x, float _y, int sceneWidth, int sceneHeight)
-    {
-        this.goalX =  (_x+(sceneWidth * 16));
-    }
-
     public void setParent(SearchNode _parent)
     {
         this.parent = _parent;
@@ -107,22 +102,25 @@ public class SearchNode implements SortedListItem<SearchNode>
         for (boolean[] action : Action.getPossibleActions(this.sim))
         {
             SearchNode s = new SearchNode(++idCounter,this.sim.clone());
-            s.setGoal(_x, _y, sceneWidth, sceneHeight);
+            //s.setGoal(_x, _y, sceneWidth, sceneHeight);
             s.setAction(action);
             s.setParent(this);
             s.setBlocked(this.sim.getMarioSim().getMarioMode());
             s.setGCost(this.gCost);
-            s.move(this.sim.getMarioSim().getX(), this.sim.getMarioSim().getY());
-            s.estimateHCost();
+            s.move(this.getMarioSim().getX(), this.getMarioSim().getY());
+            s.estimateHCost(this.sim.getMarioSim().getMarioMode());
             children.add(s);
+            System.out.println("Created: " + s.toString());
         }
-
         return children;
     }
+
+
 
     private void setBlocked(int oldMode)
     {
         blocked = false;
+        /*
         int newMode = this.sim.getMarioSim().getMarioMode();
         if (!(newMode == oldMode) )
         {
@@ -130,6 +128,11 @@ public class SearchNode implements SortedListItem<SearchNode>
             {
                 blocked = true;
             }
+        }
+        */
+        if (this.getMarioSim().isDead())
+        {
+            blocked = true;
         }
     }
 
@@ -151,7 +154,7 @@ public class SearchNode implements SortedListItem<SearchNode>
         {
             return -1;
         }
-        else if (this.getFCost() == element.getFCost())
+        else
         {
             if (this.sim.getMarioSim().getX() > element.sim.getMarioSim().getX())
             {
@@ -161,7 +164,7 @@ public class SearchNode implements SortedListItem<SearchNode>
             {
                 return 1;
             }
-            else if (this.sim.getMarioSim().getX() == element.sim.getMarioSim().getX())
+            else
             {
                 if (this.getAction()[Mario.KEY_JUMP] && !element.getAction()[Mario.KEY_JUMP])
                 {
@@ -192,20 +195,49 @@ public class SearchNode implements SortedListItem<SearchNode>
         return false;
     }
 
-    public void estimateHCost()
+    public void estimateHCost(int oldMarioMode)
     {
         float hMarioX = this.sim.getMarioSim().getX();
-        float hMarioSpeed = this.sim.getMarioSim().getXA();
-        int ticks = 0;
+        float hMarioY = this.sim.getMarioSim().getY();
+        float hMarioSpeedX = this.sim.getMarioSim().getXA();
+        float hMarioSpeedY = this.sim.getMarioSim().getYA();
+        int ticksX = 0;
+        int ticksY = 0;
+        int penalty = 0;
 
         while (hMarioX < goalX)
         {
-            ticks++;
-            hMarioX += hMarioSpeed;
-            hMarioSpeed += 1.2F;
-            hMarioSpeed *= 0.89F;
+            ticksX++;
+            hMarioX += hMarioSpeedX;
+            hMarioSpeedX += (this.action[Mario.KEY_SPEED]) ? 1.2F : 0.6 ;
+            hMarioSpeedX *= 0.89F;
         }
-        this.hCost= ticks;
+
+        while (hMarioY > 0)
+        {
+            ticksY++;
+            hMarioY += hMarioSpeedY;
+            hMarioSpeedY -=3;
+            hMarioSpeedY *= 0.89F;
+        }
+
+        if ((this.sim.getMap().getViewAt(this.getMarioSim().getX()+this.getMarioSim().getXA(), this.getMarioSim().getY()) != 0)||
+            (this.sim.getMap().getViewAt(this.getMarioSim().getX()+this.getMarioSim().getXA(), this.getMarioSim().getY()) != 2))
+        {
+            penalty+=2;
+        }
+
+        if (this.sim.getMarioSim().getMarioMode() < oldMarioMode)
+        {
+            penalty += Integer.MAX_VALUE-2000;
+        }
+
+        this.hCost= ticksX + ticksY + penalty;
+
+        if (this.sim.getMarioSim().isDead())
+        {
+            this.hCost = Integer.MAX_VALUE-1000;
+        }
     }
 
     public int getID()
@@ -223,11 +255,36 @@ public class SearchNode implements SortedListItem<SearchNode>
         return sim.getEnemySims();
     }
 
-    public float getHCost() {
-        return this.hCost;
+
+    public MarioSim getMarioSim()
+    {
+        return sim.getMarioSim();
     }
 
-    public float getGoal() {
-        return goalX;
+    public String toString()
+    {
+        StringBuilder stringBuilder = new StringBuilder();
+
+        stringBuilder.append(" Node: "+this.getID());
+        if (this.parent != null)
+        {
+            stringBuilder.append(", Parent: " + parent.getID());
+        }
+        stringBuilder.append(", Cost: "+this.getFCost() + "(" + this.getGCost() + "," + this.hCost + ")");
+        stringBuilder.append(", Action: " +Action.nameAction(this.getAction()));
+        stringBuilder.append(", Blocked: " + this.blocked);
+        stringBuilder.append(", sim Details: {" +  this.sim.toString() + "}");
+
+        return stringBuilder.toString();
+    }
+
+    public static void setGoal(float goal)
+    {
+        goalX = goal;
+    }
+
+    public Map getMap()
+    {
+        return this.sim.getMap();
     }
 }

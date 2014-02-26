@@ -1,6 +1,7 @@
 package competition.uu2013.common.Sprites;
 
 import ch.idsia.benchmark.mario.engine.sprites.Sprite;
+import competition.uu2013.common.level.Enemy;
 
 public class SpriteSim implements Cloneable
 {
@@ -87,6 +88,11 @@ public class SpriteSim implements Cloneable
     public boolean checkFireballCollide(FireBallSim fireBallSim)
     {
         return false;
+    }
+
+    public String toString()
+    {
+        return Enemy.nameEnemy(this.type) + "X: " + this.getX() + "Y: " + this.getY();
     }
 }
 

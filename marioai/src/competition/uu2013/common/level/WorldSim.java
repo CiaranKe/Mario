@@ -194,4 +194,20 @@ public class WorldSim implements Cloneable
     public MarioSim getMarioSim() {
         return marioSim;
     }
+
+    public String toString()
+    {
+        StringBuilder stringBuilder = new StringBuilder();
+
+        stringBuilder.append(" Mario {" + marioSim.toString() + "} ");
+        stringBuilder.append("Enemies {");
+        int enemyCounter = 1;
+        for (SpriteSim e: enemySims.getEnemiesList())
+        {
+            stringBuilder.append(enemyCounter + ": " +  e.toString() + "; ");
+        }
+        stringBuilder.append("}");
+
+        return stringBuilder.toString();
+    }
 }

@@ -1,6 +1,7 @@
 package competition.uu2013.common.Sprites;
 
 import ch.idsia.benchmark.mario.engine.sprites.Sprite;
+import competition.uu2013.common.level.Enemy;
 import competition.uu2013.common.level.Map;
 import competition.uu2013.common.level.WorldSim;
 
@@ -610,5 +611,10 @@ public class EnemySim extends SpriteSim implements Comparable
             return true;
         }
         return false;
+    }
+
+    public String toString()
+    {
+        return Enemy.nameEnemy(this.type) + ", X: " + this.getX() + ", Y: " + this.getY() + ", height: " + this.height + ", width: " + this.width +  ", Dead: " + this.dead;
     }
 }

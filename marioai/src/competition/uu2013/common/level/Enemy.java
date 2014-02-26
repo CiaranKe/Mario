@@ -174,6 +174,7 @@ public class Enemy implements Cloneable
                     if (((EnemySim) sprite).newWithinScope(marioX,marioY,sceneWidth))
                     {
                         System.out.println("ENEMY IN SCOPE!");
+                        newEnemiesFound = true;
                     }
                     break;
                 }

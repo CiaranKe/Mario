@@ -3,6 +3,7 @@ package competition.uu2013.common.level;
 
 import ch.idsia.benchmark.mario.engine.GlobalOptions;
 import ch.idsia.tools.MarioAIOptions;
+import competition.uu2013.common.hueristics.SearchNode;
 
 public class Map implements Cloneable
 {
@@ -31,6 +32,7 @@ public class Map implements Cloneable
     {
         Map.levelHeight = levelHeight;
         Map.levelWidth = levelWidth;
+        SearchNode.setGoal(levelWidth*16);
         loadTiles();
     }
 

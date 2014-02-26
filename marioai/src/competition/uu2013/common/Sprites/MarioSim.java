@@ -401,7 +401,6 @@ public class MarioSim  extends SpriteSim  implements Cloneable
 
     public void getHurt()
     {
-        System.out.println("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!GOT HURT!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
         if (invulnerableTime > 0) return;
 
         if (big)
@@ -524,5 +523,26 @@ public class MarioSim  extends SpriteSim  implements Cloneable
     public boolean mayJump()
     {
         return mayJump;
+    }
+
+    public String toString()
+    {
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append("X: " + this.getX() + ", Y: " + this.getY());
+        stringBuilder.append(", Status: ");
+        if (dead) stringBuilder.append("DEAD");
+        else if (fire) stringBuilder.append("FIRE");
+        else if (big)stringBuilder.append("BIG");
+        else stringBuilder.append(" SMALL ");
+        stringBuilder.append(", MayJump: " + mayJump());
+        stringBuilder.append(", JumpTime: " + jumpTime);
+        stringBuilder.append(", mayShoot: " + ableToShoot);
+        stringBuilder.append(", onGround: " + onGround);
+        stringBuilder.append(", wasOnGround: " + wasOnGround);
+        return stringBuilder.toString();
+    }
+
+    public float getYA() {
+        return this.ya;
     }
 }

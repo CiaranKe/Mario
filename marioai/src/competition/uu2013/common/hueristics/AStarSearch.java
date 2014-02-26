@@ -1,7 +1,9 @@
 package competition.uu2013.common.hueristics;
 
-import competition.uu2013.common.Sprites.MarioSim;
+import ch.idsia.benchmark.mario.engine.sprites.Mario;
+import ch.idsia.benchmark.mario.environments.Environment;
 import competition.uu2013.common.Sprites.SpriteSim;
+import competition.uu2013.common.level.Map;
 import competition.uu2013.common.level.WorldSim;
 import competition.uu2013.prototypes.Action;
 
@@ -51,26 +53,20 @@ public class AStarSearch
             closedList.clear();
             plan.clear();
             working.setGCost(0);
-            working.setGoal(_x, _y, sceneWidth, sceneHeight);
+            //working.setGoal(_x, _y, sceneWidth, sceneHeight);
             openList.add(working);
             SearchNode.resetCounter();
             SearchNode current = null;
             SearchNode farthest = working;
+            float farthestX = 0;
 
             System.out.println("Goal was: " + (_x+(sceneWidth * 16)));
 
-            while (openList.size() != 0  && (System.currentTimeMillis() - startTime) < 39)
+            while (openList.size() != 0  && (System.currentTimeMillis() - startTime) < 40)
             {
-                current = openList.getFirst();
-                try
-                {
-                    System.out.println("Node:"+ current.getID() + ", Parent: "+ current.getParent().getID() + ", Score: " + current.getGCost()+","+current.getHCost()+","+current.getFCost() +  ", Action"+ Action.nameAction(current.getAction()) + ", Blocked: " + current.isBlocked() + ", Goal: " + current.getGoal() +", X: " + current.getPredictedXY()[0]);
-                }
-                catch (NullPointerException e)
-                {
-                    System.out.println("Node:"+ current.getID() + ", Score: " + current.getFCost() +  ", Action"+ Action.nameAction(current.getAction()) + ", Goal: " + current.getGoal() +", X: " + current.getPredictedXY()[0]);
-                }
 
+                current = openList.getFirst();
+                System.out.println("Evaluating: " + current.toString());
 
                 if (current.isGoal())
                 {
@@ -81,6 +77,12 @@ public class AStarSearch
 
                 openList.remove(current);
                 closedList.add(current);
+
+                if (current.getPredictedXY()[0] > farthestX)
+                {
+                    farthest = current;
+                    farthestX = current.getPredictedXY()[0];
+                }
 
                 for (SearchNode n : current.generateChildren(_x,_y,sceneWidth,sceneHeight))
                 {
@@ -109,12 +111,7 @@ public class AStarSearch
                         {
                             n.setParent(current);
                             n.setGCost(current.getGCost());
-                            n.estimateHCost();
-                        }
-
-                        if (farthest.getPredictedXY()[0] > current.getPredictedXY()[0])
-                        {
-                            farthest = current;
+                            n.estimateHCost(current.getMarioSim().getMarioMode());
                         }
                     }
                 }
@@ -124,6 +121,8 @@ public class AStarSearch
             if (!current.isGoal())
             {
                 System.out.println("Didn't find goal");
+                System.out.println("Farthest found was : " + (farthestX - working.getPredictedXY()[0]) + " Pixels ahead");
+                extractPlan(farthest);
             }
             System.out.println("Ran " + loopCounter + " Iterations, open size: " + openList.size() + ", Time taken: " + (System.currentTimeMillis() - startTime));
         }
@@ -131,24 +130,45 @@ public class AStarSearch
         {
             return plan.pop();
         }
-        catch (EmptyStackException e)
+        catch (EmptyStackException emptyStackException)
         {
-            return new boolean[6];
+            boolean [] failedSearch = new boolean[Environment.numberOfKeys];
+            failedSearch[Mario.KEY_JUMP] = !working.getMarioSim().isMarioAbletoJump();
+
+            if (working.getMap().getViewAt(working.getMarioSim().getX()+ Map.CELL_SIZE, working.getMarioSim().getY()) != 0)
+            {
+                failedSearch[Mario.KEY_LEFT] = true;
+            }
+            else
+            {
+                failedSearch[Mario.KEY_RIGHT] = true;
+            }
+
+            return failedSearch;
+
         }
     }
 
-    private void extractPlan(SearchNode current)
+    private void extractPlan(SearchNode _current)
     {
         System.out.print("Plan: ");
-        while (current != null)
+        Stack<boolean[]> tempStack = new Stack<boolean[]>();
+
+        while (_current.getParent() !=null )
         {
-            if (current.getParent() == null)
+            if (_current.getParent() == null)
             {
                 break;
             }
-            plan.push(current.getAction());
-            System.out.print(Action.nameAction(current.getAction()) + ",");
-            current = current.getParent();
+            System.out.print(_current.getID() + ": " +Action.nameAction(_current.getAction()) + ", ");
+            tempStack.push(_current.getAction());
+            _current = _current.getParent();
+        }
+        System.out.println();
+        plan.clear();
+        while (!tempStack.empty())
+        {
+            plan.push(tempStack.pop());
         }
     }
 
