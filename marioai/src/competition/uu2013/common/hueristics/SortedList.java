@@ -80,6 +80,14 @@ public class SortedList<T extends SortedListItem<T>>  implements Iterable<T>
         return list.iterator();
     }
 
+    public void addAll(SortedList<T> children)
+    {
+        for (T t : children)
+        {
+            list.add(t);
+        }
+    }
+
     class SortedListComparator implements Comparator<T>
     {
 

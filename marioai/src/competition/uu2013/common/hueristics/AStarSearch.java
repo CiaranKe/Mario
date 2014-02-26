@@ -42,32 +42,58 @@ public class AStarSearch
     //TODO: Block parent that caused us to get hurt.
 
 
+    private float  generateChildren(SearchNode currentNode, int maxDepth, float _x, float _y)
+    {
+        float maxX = 0;
+        if (maxDepth > 0)
+        {
+            maxX = currentNode.generateChildren(_x,_y,sceneWidth,sceneHeight);
+
+            for (SearchNode s : currentNode.getChildren())
+            {
+                float temp2 = this.generateChildren(s,--maxDepth,_x,_y);
+
+                if (temp2 > maxX)
+                {
+                    maxX = temp2;
+                }
+            }
+
+            return maxX;
+        }
+        return -1;
+    }
+
+
     public boolean[] pathFind(float _x, float _y, long startTime)
     {
         if (rePlanNewEnemy || rePlanLostSync || plan.empty())
         {
             System.out.println("Lost Sync: "+rePlanLostSync+", New Enemy: "+rePlanNewEnemy+", Empty plan: "+plan.empty());
 
-            int loopCounter = 1;
             openList.clear();
             closedList.clear();
             plan.clear();
             working.setGCost(0);
-            //working.setGoal(_x, _y, sceneWidth, sceneHeight);
             openList.add(working);
             SearchNode.resetCounter();
-            SearchNode current = null;
+            SearchNode current = working;
             SearchNode farthest = working;
+            float goal = this.generateChildren(working, 6, _x, _y);
+            if ((goal - _x) < 1.0F)
+            {
+                goal+=10;
+            }
+            System.out.println("Goal is " + (goal - _x));
+            SearchNode.setGoal(goal);
             float farthestX = 0;
 
-            System.out.println("Goal was: " + (_x+(sceneWidth * 16)));
+            int loopCounter = 1;
 
-            while (openList.size() != 0  && (System.currentTimeMillis() - startTime) < 40)
+
+            while (openList.size() != 0)
             {
-
-                current = openList.getFirst();
-                System.out.println("Evaluating: " + current.toString());
-
+                //System.out.println("Iteration: " + loopCounter + " Open size: " + openList.size() + " Closed Size: " +closedList.size());
                 if (current.isGoal())
                 {
                     System.out.println("Ran " + loopCounter + " Iterations, open size: " + openList.size() + ", Time taken: " + (System.currentTimeMillis() - startTime));
@@ -75,49 +101,53 @@ public class AStarSearch
                     return plan.pop();
                 }
 
-                openList.remove(current);
-                closedList.add(current);
-
-                if (current.getPredictedXY()[0] > farthestX)
+                if (current.getPredictedXY()[0] >= farthestX)
                 {
                     farthest = current;
                     farthestX = current.getPredictedXY()[0];
                 }
 
-                for (SearchNode n : current.generateChildren(_x,_y,sceneWidth,sceneHeight))
+                if (current.getChildren() != null)
                 {
-                    boolean isBetter;
+                    for (SearchNode n : current.getChildren())
+                    {
+                        boolean isBetter;
 
-                    if (closedList.contains(n))
-                    {
-                        continue;
-                    }
-                    if (!n.isBlocked())
-                    {
-                        if (!openList.contains(n))
+                        if (closedList.contains(n))
                         {
-                            openList.add(n);
-                            isBetter = true;
+                            continue;
                         }
-                        else if (n.getFCost() < current.getFCost())
+                        if (!n.isBlocked())
                         {
-                            isBetter = true;
-                        }
-                        else
-                        {
-                            isBetter = false;
-                        }
-                        if (isBetter)
-                        {
-                            n.setParent(current);
-                            n.setGCost(current.getGCost());
-                            n.estimateHCost(current.getMarioSim().getMarioMode());
+                            if (!openList.contains(n))
+                            {
+                                openList.add(n);
+                                isBetter = true;
+                            }
+                            else if (n.getFCost() < current.getFCost())
+                            {
+                                isBetter = true;
+                            }
+                            else
+                            {
+                                isBetter = false;
+                            }
+                            if (isBetter)
+                            {
+                                n.setParent(current);
+                                n.setGCost(current.getGCost());
+                                n.estimateHCost(current.getMarioSim().getMarioMode());
+                            }
                         }
                     }
                 }
-                loopCounter++;
-            }
 
+                loopCounter++;
+                current = openList.getFirst();
+                openList.remove(current);
+                closedList.add(current);
+
+            }
             if (!current.isGoal())
             {
                 System.out.println("Didn't find goal");
@@ -143,9 +173,8 @@ public class AStarSearch
             {
                 failedSearch[Mario.KEY_RIGHT] = true;
             }
-
+            System.out.println("SEARCH FAILED!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
             return failedSearch;
-
         }
     }
 
@@ -156,11 +185,10 @@ public class AStarSearch
 
         while (_current.getParent() !=null )
         {
-            if (_current.getParent() == null)
+            if (_current.getParent() == null || _current.getID() == 1)
             {
                 break;
             }
-            System.out.print(_current.getID() + ": " +Action.nameAction(_current.getAction()) + ", ");
             tempStack.push(_current.getAction());
             _current = _current.getParent();
         }
@@ -169,6 +197,7 @@ public class AStarSearch
         while (!tempStack.empty())
         {
             plan.push(tempStack.pop());
+            System.out.print(_current.getID() + ": " +Action.nameAction(plan.peek()) + ", ");
         }
     }
 

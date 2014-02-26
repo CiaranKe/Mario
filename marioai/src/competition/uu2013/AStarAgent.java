@@ -19,6 +19,7 @@ import java.util.ArrayList;
 public class AStarAgent extends MarioAIAgent implements Agent
 {
     private AStarSearch search;
+    private int jumpCounter = 0;
 
 
     public AStarAgent()
@@ -46,9 +47,24 @@ public class AStarAgent extends MarioAIAgent implements Agent
                 EnemySim simN = new EnemySim(( marioFloatPos[0] + enemiesFloatPos[x+1]), ( marioFloatPos[0] + enemiesFloatPos[x+2]), (int)enemiesFloatPos[x]);
                 System.out.println("Actual ("+ Enemy.withinScope(marioFloatPos[0], marioFloatPos[1], 11, 11, simN) +") : " + Enemy.nameEnemy(simN.getType()) + " @ " +simN.getX()+" : "+simN.getY() );
             }
+
+            if (isMarioOnGround && isMarioAbleToJump)
+            {
+                jumpCounter = 7;
+            }
+
+
             System.out.println("Updating sim");
             search.updateSim(marioFloatPos[0], marioFloatPos[1], isMarioAbleToJump, isMarioOnGround, isMarioAbleToShoot, marioStatus, this.enemiesFloatPos, this.levelScene, action);
             action = search.pathFind(marioFloatPos[0],marioFloatPos[1],startTime);
+            if (action[Mario.KEY_JUMP])
+            {
+                jumpCounter--;
+            }
+            if (action[Mario.KEY_JUMP] && jumpCounter <= 0)
+            {
+                action[Mario.KEY_JUMP] = false;
+            }
             System.out.println("Completing: " + Action.nameAction(action));
         }
 

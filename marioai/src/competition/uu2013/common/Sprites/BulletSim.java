@@ -15,7 +15,32 @@ public class BulletSim extends EnemySim implements Cloneable
     @Override
     public BulletSim clone() throws CloneNotSupportedException
     {
-        BulletSim n = (BulletSim) super.clone();
+        BulletSim n = new BulletSim(this.x, this.y,this.type);
+        n.x = this.x;
+        n.y = this.y;
+        n.xa = this.xa;
+        n.ya = this.ya;
+        n.facing = this.facing;
+        n.type = this.type;
+        n.lastX = this.lastX;
+        n.lastY = this.lastY;
+        n.height = this.height;
+        n.width = this.width;
+        n.avoidCliffs = this.avoidCliffs;
+        n.winged = this.winged;
+        n.onGround = this.onGround;
+        n.seen = this.seen;
+        n.flyDeath = this.flyDeath;
+        n.deadTime = this.deadTime;
+        n.noFireballDeath = this.noFireballDeath;
+        n.dead = this.dead;
+        n.accurateY = this.accurateY;
+        n.accurateX = this.accurateX;
+        n.yaUnknown = this.yaUnknown;
+        n.firstMove = this.firstMove;
+        n.oldX = this.oldX;
+        n.oldY = this.oldY;
+        n.alreadyInScope = this.alreadyInScope;
         return n;
     }
 
@@ -129,6 +154,6 @@ public class BulletSim extends EnemySim implements Cloneable
 
     public int height()
     {
-        return this.height();
+        return this.height;
     }
 }

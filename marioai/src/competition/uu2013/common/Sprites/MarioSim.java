@@ -34,9 +34,11 @@ public class MarioSim  extends SpriteSim  implements Cloneable
     private float oldYa;
     private boolean oldWasOnGround;
     private boolean oldIsOnGround;
+    private boolean hurt = false;
     private Mario marioActual;
     private boolean ableToShoot = true;
     private Map map;
+
 
 
     public static final int KEY_LEFT = 0;
@@ -45,7 +47,6 @@ public class MarioSim  extends SpriteSim  implements Cloneable
     public static final int KEY_JUMP = 3;
     public static final int KEY_SPEED = 4;
     public static final int KEY_UP = 5;
-
 
 
     public MarioSim(float _x, float _y, float _xa, float _ya)
@@ -401,6 +402,7 @@ public class MarioSim  extends SpriteSim  implements Cloneable
 
     public void getHurt()
     {
+        hurt = true;
         if (invulnerableTime > 0) return;
 
         if (big)
@@ -544,5 +546,9 @@ public class MarioSim  extends SpriteSim  implements Cloneable
 
     public float getYA() {
         return this.ya;
+    }
+
+    public boolean isHurt() {
+        return hurt;
     }
 }

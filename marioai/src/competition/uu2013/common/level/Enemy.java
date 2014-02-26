@@ -163,7 +163,7 @@ public class Enemy implements Cloneable
                     ((EnemySim) sprite).setAccurateX(newEnemy.getX());
                     ((EnemySim) sprite).setAccurateY(newEnemy.getY());
 
-                    if (newEnemiesFound && ((EnemySim) sprite).withinScope(marioX,marioY, sceneWidth))
+                    if (newEnemiesFound && ((EnemySim) sprite).withinScope(marioX,marioY, sceneWidth, sceneWidth))
                     {
                         System.out.println("LOST ENEMY SYNC!");
                     }
@@ -171,7 +171,7 @@ public class Enemy implements Cloneable
                     {
                         newEnemiesFound = false;
                     }
-                    if (((EnemySim) sprite).newWithinScope(marioX,marioY,sceneWidth))
+                    if (((EnemySim) sprite).newWithinScope(marioX,marioY,sceneWidth,sceneWidth))
                     {
                         System.out.println("ENEMY IN SCOPE!");
                         newEnemiesFound = true;
@@ -187,6 +187,7 @@ public class Enemy implements Cloneable
                 ((EnemySim)newEnemy).setXA(2);
                 ((EnemySim)newEnemy).setAccurateX(newEnemy.getX());
                 ((EnemySim)newEnemy).setAccurateY(newEnemy.getY());
+                ((EnemySim)newEnemy).newWithinScope(marioX,marioY,sceneWidth,sceneWidth);
                 newSprites.add(newEnemy);
             }
         }

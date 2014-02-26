@@ -23,6 +23,7 @@ public class SearchNode implements SortedListItem<SearchNode>
     private static float goalX;
 
     private SearchNode parent;
+    private SortedList<SearchNode> children;
     private boolean blocked;
     private int id;
 
@@ -83,7 +84,7 @@ public class SearchNode implements SortedListItem<SearchNode>
 
     public boolean isGoal()
     {
-        return (this.sim.getMarioSim().getX() > this.goalX);
+        return (this.sim.getMarioSim().getX() > this.goalX-1);
     }
     public void setParent(SearchNode _parent)
     {
@@ -96,8 +97,10 @@ public class SearchNode implements SortedListItem<SearchNode>
     }
 
 
-    public SortedList<SearchNode> generateChildren(float _x, float _y, int sceneWidth, int sceneHeight) {
-        SortedList<SearchNode> children = new SortedList<SearchNode>();
+    public float generateChildren(float _x, float _y, int sceneWidth, int sceneHeight)
+    {
+        this.children = new SortedList<SearchNode>();
+        float maxX = 0;
 
         for (boolean[] action : Action.getPossibleActions(this.sim))
         {
@@ -105,31 +108,25 @@ public class SearchNode implements SortedListItem<SearchNode>
             //s.setGoal(_x, _y, sceneWidth, sceneHeight);
             s.setAction(action);
             s.setParent(this);
-            s.setBlocked(this.sim.getMarioSim().getMarioMode());
+            s.setBlocked(this.sim.getMarioSim());
             s.setGCost(this.gCost);
             s.move(this.getMarioSim().getX(), this.getMarioSim().getY());
             s.estimateHCost(this.sim.getMarioSim().getMarioMode());
             children.add(s);
-            System.out.println("Created: " + s.toString());
+            //System.out.println("Created: " + s.toString());
+            if (s.getPredictedXY()[0] > maxX)
+            {
+                maxX = s.getPredictedXY()[0];
+            }
         }
-        return children;
+        return maxX;
     }
 
 
 
-    private void setBlocked(int oldMode)
+    private void setBlocked(MarioSim oldSim)
     {
         blocked = false;
-        /*
-        int newMode = this.sim.getMarioSim().getMarioMode();
-        if (!(newMode == oldMode) )
-        {
-            if (newMode < oldMode)
-            {
-                blocked = true;
-            }
-        }
-        */
         if (this.getMarioSim().isDead())
         {
             blocked = true;
@@ -229,15 +226,17 @@ public class SearchNode implements SortedListItem<SearchNode>
 
         if (this.sim.getMarioSim().getMarioMode() < oldMarioMode)
         {
-            penalty += Integer.MAX_VALUE-2000;
+            penalty += 600;
+            parent.setPenalty(500);
         }
-
-        this.hCost= ticksX + ticksY + penalty;
 
         if (this.sim.getMarioSim().isDead())
         {
-            this.hCost = Integer.MAX_VALUE-1000;
+            penalty += Integer.MAX_VALUE-5000;
+            parent.setPenalty(Integer.MAX_VALUE-6000);
         }
+
+        this.hCost= ticksX + ticksY + penalty;
     }
 
     public int getID()
@@ -286,5 +285,13 @@ public class SearchNode implements SortedListItem<SearchNode>
     public Map getMap()
     {
         return this.sim.getMap();
+    }
+
+    public SortedList<SearchNode> getChildren() {
+        return children;
+    }
+
+    public void setPenalty(int penalty) {
+        this.hCost += penalty;
     }
 }

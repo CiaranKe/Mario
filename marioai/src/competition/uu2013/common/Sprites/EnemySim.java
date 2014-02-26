@@ -587,26 +587,23 @@ public class EnemySim extends SpriteSim implements Comparable
         return accurateX;
     }
 
-    public boolean newWithinScope(float marioX, float marioY, int sceneWidth)
+    public boolean newWithinScope(float marioX, float marioY, int halfSceneWidth, int halfSceneHeight)
     {
-        if (!alreadyInScope)
+        if (!alreadyInScope  && this.withinScope(marioX, marioY, halfSceneWidth, halfSceneHeight))
         {
-            if(this.withinScope(marioX, marioY, sceneWidth))
-            {
-                this.alreadyInScope = true;
-            }
+            this.alreadyInScope = true;
         }
         return !alreadyInScope;
     }
 
-    public boolean withinScope(float marioX, float marioY, int sceneWidth)
+    public boolean withinScope(float marioX, float marioY, int halfSceneWidth, int halfSceneHeight)
     {
-        float scopeXForwardDistance = marioX + (sceneWidth * 16);
-        float scopeXBehindDistance = marioX + (sceneWidth * 16);
-        float scopeYLowerDistance = marioY + (sceneWidth * 16);
-        float scopeYUpperDistance = marioY - (sceneWidth * 16);
+        float lookAHead = marioX + (halfSceneWidth * 16);
+        float lookBelow = marioY + (halfSceneHeight * 16);
+        float lookBehind = marioX - (halfSceneWidth * 16);
+        float lookAbove = marioY - (halfSceneHeight * 16);
 
-        if (this.x < scopeXForwardDistance && this.x > scopeXBehindDistance && this.y > scopeYLowerDistance && this.y < scopeYUpperDistance)
+        if ((this.x < lookAHead) && (this.y < lookBelow) && (this.x > lookBehind) && (this.y > lookAbove))
         {
             return true;
         }
