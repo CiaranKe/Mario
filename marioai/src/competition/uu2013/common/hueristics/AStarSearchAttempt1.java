@@ -100,7 +100,7 @@ public class AStarSearchAttempt1
         this.sceneHeight = scene.length / 2;
         working.setAction(_lastAction);
         working.move(x, y);
-        rePlanNewEnemy = working.updateSim(x,y,isMarioAbleToJump,isMarioOnGround,isMarioAbleToShoot,marioStatus,newEnemies,scene);
+        //rePlanNewEnemy = working.updateSim(x,y,isMarioAbleToJump,isMarioOnGround,isMarioAbleToShoot,marioStatus,newEnemies,scene);
 
         float [] predXY = working.getPredictedXY();
 

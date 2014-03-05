@@ -45,6 +45,7 @@ public class Action
         actionList.add(createAction(Action.RIGHT_SPEED));
         actionList.add(createAction(Action.LEFT));
         actionList.add(createAction(Action.LEFT_SPEED));
+        actionList.add(createAction(Action.WAIT));
         return actionList;
     }
 

@@ -11,6 +11,9 @@ import competition.uu2013.common.level.WorldSim;
 import competition.uu2013.common.Sprites.EnemySim;
 import competition.uu2013.common.Sprites.MarioSim;
 
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.PrintStream;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 
@@ -21,6 +24,7 @@ public class TestingAgent extends MarioAIAgent implements Agent
     private int jumpCounter =0;
     private float lastPredX = 32.0F;
     private float lastPredY = 35.0F;
+    private boolean wasOnGround;
 
     public TestingAgent()
     {
@@ -48,15 +52,16 @@ public class TestingAgent extends MarioAIAgent implements Agent
         {
             worldSim = new WorldSim(new MarioSim(marioFloatPos[0],marioFloatPos[1], 0.0F, 3.0F), new Enemy(), new Map());
             worldSim.move(action, marioFloatPos[0], marioFloatPos[1]);
-            worldSim.syncLocation(marioFloatPos[0], marioFloatPos[1], isMarioAbleToJump, isMarioOnGround, isMarioAbleToShoot, marioStatus, this.enemiesFloatPos, this.levelScene);
+            worldSim.syncLocation(marioFloatPos[0], marioFloatPos[1], isMarioAbleToJump, wasOnGround, isMarioOnGround, isMarioAbleToShoot, marioStatus, this.enemiesFloatPos, this.levelScene);
         }
         else
         {
             worldSim.move(action, marioFloatPos[0], marioFloatPos[1]);
             lastPredX = worldSim.getMarioLocation()[0];
             lastPredY = worldSim.getMarioLocation()[1];
-            worldSim.syncLocation(marioFloatPos[0], marioFloatPos[1], isMarioAbleToJump, isMarioOnGround, isMarioAbleToShoot, marioStatus, this.enemiesFloatPos, this.levelScene);
+            worldSim.syncLocation(marioFloatPos[0], marioFloatPos[1], isMarioAbleToJump, isMarioOnGround, wasOnGround, isMarioAbleToShoot, marioStatus, this.enemiesFloatPos, this.levelScene);
 
+            wasOnGround = isMarioOnGround;
             //Map.printMap(worldSim.getMap());
 
             boolean synced = true;
@@ -120,7 +125,6 @@ public class TestingAgent extends MarioAIAgent implements Agent
                 action[Mario.KEY_RIGHT] = true;
             if (action[Mario.KEY_JUMP]) jumpCounter++;
             else jumpCounter = 0;
-            System.out.println("A: Able: "+ GlobalOptions.mario.mayJump() +", S: Able: " + worldSim.getMarioSim().mayJump() +", Jumping: " + action[Mario.KEY_JUMP] + ", True Jump Counter:" + jumpCounter + ", Simmed JC: " + worldSim.getMarioSim().getJumpTime() + ", AJC: " + GlobalOptions.mario.getJumpTime());
 
             if (!synced)
             {
@@ -138,6 +142,15 @@ public class TestingAgent extends MarioAIAgent implements Agent
     public void reset()
     {
         action = new boolean[Environment.numberOfKeys];
+        PrintStream newout = new PrintStream(new OutputStream() {
+            @Override
+            public void write(int b) throws IOException
+            {
+
+            }
+        });
+        System.setOut(newout);
+
     }
 
 

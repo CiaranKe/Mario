@@ -120,16 +120,6 @@ public class MarioSim  extends SpriteSim  implements Cloneable
     }
 
 
-    public float getLastX()
-    {
-        return this.lastX;
-    }
-
-    public float getLastY()
-    {
-        return this.lastY;
-    }
-
     public int height()
     {
         return big ? 24 : 12;
@@ -428,7 +418,7 @@ public class MarioSim  extends SpriteSim  implements Cloneable
         return this.dead;
     }
 
-    public void syncLocation(float _x, float _y, boolean _mayJump, boolean _onGround, boolean _fire, int _big)
+    public void syncLocation(float _x, float _y, boolean _mayJump, boolean _onGround, boolean _wasOnGround, boolean _fire, int _big)
     {
         if ((_x != x)|| (_y !=y))
         {
@@ -439,7 +429,7 @@ public class MarioSim  extends SpriteSim  implements Cloneable
         }
 
         this.mayJump = _mayJump;
-        wasOnGround = onGround;
+        wasOnGround = _wasOnGround;
         this.onGround = _onGround;
         this.big = (_big > 0);
         this.fire = (_big == 2);

@@ -45,9 +45,9 @@ public class SearchNode implements SortedListItem<SearchNode>
         return new float[] {this.predX, this.predY};
     }
 
-    public boolean updateSim(float x, float y, boolean isMarioAbleToJump, boolean isMarioOnGround, boolean isMarioAbleToShoot, int marioStatus, float [] newEnemies, byte [][] scene)
+    public boolean updateSim(float x, float y, boolean isMarioAbleToJump, boolean isMarioOnGround, boolean wasOnGround, boolean isMarioAbleToShoot, int marioStatus, float [] newEnemies, byte [][] scene)
     {
-        return sim.syncLocation(x,y,isMarioAbleToJump,isMarioOnGround,isMarioAbleToShoot,marioStatus,newEnemies,scene);
+        return sim.syncLocation(x,y,isMarioAbleToJump,isMarioOnGround, wasOnGround,isMarioAbleToShoot,marioStatus,newEnemies,scene);
     }
 
     public void setAction(boolean[] _action)
@@ -113,7 +113,7 @@ public class SearchNode implements SortedListItem<SearchNode>
             s.move(this.getMarioSim().getX(), this.getMarioSim().getY());
             s.estimateHCost(this.sim.getMarioSim().getMarioMode());
             children.add(s);
-            //System.out.println("Created: " + s.toString());
+            System.out.println("Created: " + s.toString());
             if (s.getPredictedXY()[0] > maxX)
             {
                 maxX = s.getPredictedXY()[0];
@@ -127,7 +127,7 @@ public class SearchNode implements SortedListItem<SearchNode>
     private void setBlocked(MarioSim oldSim)
     {
         blocked = false;
-        if (this.getMarioSim().isDead())
+        if (this.getMarioSim().isDead() || (this.getMarioSim().getMarioMode() < oldSim.getMarioMode()))
         {
             blocked = true;
         }
@@ -206,7 +206,7 @@ public class SearchNode implements SortedListItem<SearchNode>
         {
             ticksX++;
             hMarioX += hMarioSpeedX;
-            hMarioSpeedX += (this.action[Mario.KEY_SPEED]) ? 1.2F : 0.6 ;
+            hMarioSpeedX += (this.action[Mario.KEY_SPEED]) ? 0.6 : 1.2 ;
             hMarioSpeedX *= 0.89F;
         }
 

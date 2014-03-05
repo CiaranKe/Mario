@@ -151,11 +151,11 @@ public class WorldSim implements Cloneable
         return new float[] {marioSim.getX(), marioSim.getY()};
     }
 
-    public boolean syncLocation(float x, float y, boolean isMarioAbleToJump, boolean isMarioOnGround, boolean isMarioAbleToShoot, int marioStatus, float [] newEnemies, byte [][] scene)
+    public boolean syncLocation(float x, float y, boolean isMarioAbleToJump, boolean isMarioOnGround, boolean wasOnGround, boolean isMarioAbleToShoot, int marioStatus, float [] newEnemies, byte [][] scene)
     {
         boolean newEnemy;
 
-        this.marioSim.syncLocation(x, y, isMarioAbleToJump, isMarioOnGround, isMarioAbleToShoot, marioStatus);
+        this.marioSim.syncLocation(x, y, isMarioAbleToJump, isMarioOnGround, wasOnGround, isMarioAbleToShoot, marioStatus);
         this.mapSim.setScene(scene,x,y);
         newEnemy = this.enemySims.setEnemies(newEnemies,x,y, (scene[0].length / 2));
 

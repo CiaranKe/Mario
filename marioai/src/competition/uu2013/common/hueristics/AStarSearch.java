@@ -21,6 +21,7 @@ import java.util.Stack;
 public class AStarSearch
 {
 
+    private static final int SEARCH_DEPTH = 3;
     private boolean rePlanNewEnemy;
     private boolean rePlanLostSync;
     private int sceneWidth;
@@ -79,7 +80,7 @@ public class AStarSearch
             SearchNode.resetCounter();
             SearchNode current = working;
             SearchNode farthest = working;
-            float goal = this.generateChildren(working, 6, _x, _y);
+            float goal = this.generateChildren(working, SEARCH_DEPTH, _x, _y);
             if ((goal - _x) < 1.0F)
             {
                 goal+=10;
@@ -144,6 +145,7 @@ public class AStarSearch
 
                 loopCounter++;
                 current = openList.getFirst();
+                System.out.println("Expanding node: "  + current.getID());
                 openList.remove(current);
                 closedList.add(current);
 
@@ -202,14 +204,14 @@ public class AStarSearch
     }
 
 
-    public void updateSim(float x, float y, boolean isMarioAbleToJump, boolean isMarioOnGround, boolean isMarioAbleToShoot, int marioStatus, float [] newEnemies, byte [][] scene, boolean [] _lastAction)
+    public void updateSim(float x, float y, boolean isMarioAbleToJump, boolean isMarioOnGround, boolean wasOnGround, boolean isMarioAbleToShoot, int marioStatus, float [] newEnemies, byte [][] scene, boolean [] _lastAction)
     {
 
         this.sceneWidth = scene[0].length / 2;
         this.sceneHeight = scene.length / 2;
         working.setAction(_lastAction);
         working.move(x, y);
-        rePlanNewEnemy = working.updateSim(x,y,isMarioAbleToJump,isMarioOnGround,isMarioAbleToShoot,marioStatus,newEnemies,scene);
+        rePlanNewEnemy = working.updateSim(x,y,isMarioAbleToJump,isMarioOnGround, wasOnGround,isMarioAbleToShoot,marioStatus,newEnemies,scene);
 
         float [] predXY = working.getPredictedXY();
 

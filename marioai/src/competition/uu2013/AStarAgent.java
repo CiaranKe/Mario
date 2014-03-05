@@ -20,6 +20,7 @@ public class AStarAgent extends MarioAIAgent implements Agent
 {
     private AStarSearch search;
     private int jumpCounter = 0;
+    private boolean wasOnGround = false;
 
 
     public AStarAgent()
@@ -37,7 +38,7 @@ public class AStarAgent extends MarioAIAgent implements Agent
         if (search == null)
         {
             search = new AStarSearch(new WorldSim(new MarioSim(marioFloatPos[0],marioFloatPos[1], 0.0F, 3.0F), new Enemy(), new Map()));
-            search.updateSim(marioFloatPos[0], marioFloatPos[1], isMarioAbleToJump, isMarioOnGround, isMarioAbleToShoot, marioStatus, this.enemiesFloatPos, this.levelScene, action);
+            search.updateSim(marioFloatPos[0], marioFloatPos[1], isMarioAbleToJump, isMarioOnGround, wasOnGround, isMarioAbleToShoot, marioStatus, this.enemiesFloatPos, this.levelScene, action);
 
         }
         else
@@ -55,16 +56,10 @@ public class AStarAgent extends MarioAIAgent implements Agent
 
 
             System.out.println("Updating sim");
-            search.updateSim(marioFloatPos[0], marioFloatPos[1], isMarioAbleToJump, isMarioOnGround, isMarioAbleToShoot, marioStatus, this.enemiesFloatPos, this.levelScene, action);
+            search.updateSim(marioFloatPos[0], marioFloatPos[1], isMarioAbleToJump, isMarioOnGround, wasOnGround, isMarioAbleToShoot, marioStatus, this.enemiesFloatPos, this.levelScene, action);
             action = search.pathFind(marioFloatPos[0],marioFloatPos[1],startTime);
-            if (action[Mario.KEY_JUMP])
-            {
-                jumpCounter--;
-            }
-            if (action[Mario.KEY_JUMP] && jumpCounter <= 0)
-            {
-                action[Mario.KEY_JUMP] = false;
-            }
+            this.wasOnGround = isMarioOnGround;
+
             System.out.println("Completing: " + Action.nameAction(action));
         }
 
