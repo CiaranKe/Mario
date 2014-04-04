@@ -1,7 +1,12 @@
+/*
+ * 
+ */
 package competition.uu2013.common.Sprites;
 
 import competition.uu2013.common.Sprites.EnemySim;
+import competition.uu2013.common.level.WorldSim;
 
+// TODO: Auto-generated Javadoc
 /**
  * Created with IntelliJ IDEA.
  * User: fluffy
@@ -11,36 +16,81 @@ import competition.uu2013.common.Sprites.EnemySim;
  */
 public class EnemyFlowerSim extends EnemySim implements Cloneable
 {
+    
+    /** The y start. */
     private int yStart;
+    
+    /** The jump time. */
     private int jumpTime = 0;
 
-    public EnemyFlowerSim(float _x, float _y, int _type)
+    /**
+     * Instantiates a new enemy flower sim.
+     *
+     * @param _x the _x
+     * @param _y the _y
+     * @param _type the _type
+     * @param _sim the _sim
+     */
+    public EnemyFlowerSim(float _x, float _y, int _type, MarioSim _sim)
     {
         super(_x, _y, _type);
 
         this.height = 12;
         this.width = 2;
+        this.marioSim = _sim;
 
         yStart = (int)_y/16;
-        ya = -8;
+        yAcceleration = -8;
 
-        this.y -= 1;
+        this.yLocation -= 1;
 
         for (int i = 0; i < 4; i++)
         {
             move();
         }
+
     }
 
+    /* (non-Javadoc)
+     * @see competition.uu2013.common.Sprites.EnemySim#clone()
+     */
     @Override
     public EnemyFlowerSim clone() throws CloneNotSupportedException
     {
-        EnemyFlowerSim n = (EnemyFlowerSim) super.clone();
+        EnemyFlowerSim n = new EnemyFlowerSim(this.xLocation, this.yLocation,this.simType,this.marioSim);
+        n.xLocation = this.xLocation;
+        n.yLocation = this.yLocation;
+        n.xAcceleration = this.xAcceleration;
+        n.yAcceleration = this.yAcceleration;
+        n.facing = this.facing;
+        n.simType = this.simType;
+        n.lastX = this.lastX;
+        n.lastY = this.lastY;
+        n.height = this.height;
+        n.width = this.width;
+        n.avoidCliffs = this.avoidCliffs;
+        n.winged = this.winged;
+        n.onGround = this.onGround;
+        n.seen = this.seen;
+        n.flyDeath = this.flyDeath;
+        n.deadTime = this.deadTime;
+        n.noFireballDeath = this.noFireballDeath;
+        n.dead = this.dead;
+        n.accurateY = this.accurateY;
+        n.accurateX = this.accurateX;
+        n.yaUnknown = this.yaUnknown;
+        n.firstMove = this.firstMove;
+        n.oldX = this.oldX;
+        n.oldY = this.oldY;
+        n.alreadyInScope = this.alreadyInScope;
         n.yStart = this.yStart;
         n.jumpTime = this.jumpTime;
         return n;
     }
 
+    /* (non-Javadoc)
+     * @see competition.uu2013.common.Sprites.EnemySim#move()
+     */
     public void move()
     {
         if (deadTime > 0)
@@ -53,24 +103,24 @@ public class EnemyFlowerSim extends EnemySim implements Cloneable
                 return;
             }
 
-            x += xa;
-            y += ya;
-            ya *= 0.95;
-            ya += 1;
+            xLocation += xAcceleration;
+            yLocation += yAcceleration;
+            yAcceleration *= 0.95;
+            yAcceleration += 1;
         }
 
-        if (y >= yStart)
+        if (yLocation >= yStart)
         {
-            y = yStart;
+            yLocation = yStart;
 
-            int xd = (int) (Math.abs(this.marioSim.getX() - x));
+            int xd = (int) (Math.abs(this.marioSim.getXLocation() - xLocation));
             jumpTime++;
             if (jumpTime > 40 && xd > 24)
             {
-                ya = -8;
+                yAcceleration = -8;
             } else
             {
-                ya = 0;
+                yAcceleration = 0;
             }
         }
         else
@@ -78,9 +128,9 @@ public class EnemyFlowerSim extends EnemySim implements Cloneable
             jumpTime = 0;
         }
 
-        y += ya;
-        ya *= 0.9;
-        ya += 0.1f;
+        yLocation += yAcceleration;
+        yAcceleration *= 0.9;
+        yAcceleration += 0.1f;
     }
 
 }

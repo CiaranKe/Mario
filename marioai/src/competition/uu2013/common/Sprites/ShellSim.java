@@ -1,12 +1,30 @@
+/*
+ * 
+ */
 package competition.uu2013.common.Sprites;
 
 import competition.uu2013.common.level.Map;
 
+// TODO: Auto-generated Javadoc
+/**
+ * The Class ShellSim.
+ */
 public class ShellSim extends EnemySim implements Cloneable
 {
+    
+    /** The yaa. */
     private float yaa;
+    
+    /** The carried. */
     public boolean carried;
 
+    /**
+     * Instantiates a new shell sim.
+     *
+     * @param _x the _x
+     * @param _y the _y
+     * @param _type the _type
+     */
     public ShellSim(float _x, float _y, int _type)
     {
         super(_x, _y, _type);
@@ -14,21 +32,24 @@ public class ShellSim extends EnemySim implements Cloneable
         facing = 0;
         deadTime = 0;
 
-        ya = -5;
+        yAcceleration = -5;
 
         yaa = 2.0F;
     }
 
+    /* (non-Javadoc)
+     * @see competition.uu2013.common.Sprites.EnemySim#clone()
+     */
     @Override
     public ShellSim clone() throws CloneNotSupportedException
     {
-        ShellSim n = new ShellSim(this.x,this.y, this.type);
-        n.x = this.x;
-        n.y = this.y;
-        n.xa = this.xa;
-        n.ya = this.ya;
+        ShellSim n = new ShellSim(this.xLocation,this.yLocation, this.simType);
+        n.xLocation = this.xLocation;
+        n.yLocation = this.yLocation;
+        n.xAcceleration = this.xAcceleration;
+        n.yAcceleration = this.yAcceleration;
         n.facing = this.facing;
-        n.type = this.type;
+        n.simType = this.simType;
         n.lastX = this.lastX;
         n.lastY = this.lastY;
         n.height = this.height;
@@ -55,12 +76,18 @@ public class ShellSim extends EnemySim implements Cloneable
 
 
 
+    /**
+     * Fireball collide check.
+     *
+     * @param fireball the fireball
+     * @return true, if successful
+     */
     public boolean fireballCollideCheck(FireBallSim fireball)
     {
         if (deadTime != 0) return false;
 
-        float xD = fireball.getX() - x;
-        float yD = fireball.getY() - y;
+        float xD = fireball.getXLocation() - xLocation;
+        float yD = fireball.getYLocation() - yLocation;
 
         if (xD > -16 && xD < 16)
         {
@@ -71,8 +98,8 @@ public class ShellSim extends EnemySim implements Cloneable
                     return true;
                 }
 
-                xa = fireball.getFacing() * 2;
-                ya = -5;
+                xAcceleration = fireball.getFacing() * 2;
+                yAcceleration = -5;
                 deadTime = 100;
                 return true;
             }
@@ -80,6 +107,9 @@ public class ShellSim extends EnemySim implements Cloneable
         return false;
     }
 
+    /* (non-Javadoc)
+     * @see competition.uu2013.common.Sprites.EnemySim#collideCheck()
+     */
     public void collideCheck()
     {
         if (carried || dead || deadTime > 0)
@@ -87,19 +117,19 @@ public class ShellSim extends EnemySim implements Cloneable
             return;
         }
 
-        float xMarioD = marioSim.getX() - x;
-        float yMarioD = marioSim.getY() - y;
+        float xMarioD = marioSim.getXLocation() - xLocation;
+        float yMarioD = marioSim.getYLocation() - yLocation;
         float w = 16;
         if (xMarioD > -w && xMarioD < w)
         {
-            if (yMarioD > -height && yMarioD < marioSim.height())
+            if (yMarioD > -height && yMarioD < marioSim.getHeight())
             {
                 if (marioSim.getYa() > 0 && yMarioD <= 0 && (!marioSim.isOnGround() || !marioSim.wasOnGround()))
                 {
                     marioSim.stomp(this);
                     if (facing != 0)
                     {
-                        xa = 0;
+                        xAcceleration = 0;
                         facing = 0;
                     } else
                     {
@@ -119,6 +149,9 @@ public class ShellSim extends EnemySim implements Cloneable
         }
     }
 
+    /* (non-Javadoc)
+     * @see competition.uu2013.common.Sprites.EnemySim#move()
+     */
     public void move()
     {
         if (carried)
@@ -138,10 +171,10 @@ public class ShellSim extends EnemySim implements Cloneable
                 deadTime = 1;
             }
 
-            x += xa;
-            y += ya;
-            ya *= 0.95;
-            ya += 1;
+            xLocation += xAcceleration;
+            yLocation += yAcceleration;
+            yAcceleration *= 0.95;
+            yAcceleration += 1;
 
             return;
         }
@@ -149,16 +182,16 @@ public class ShellSim extends EnemySim implements Cloneable
         float sideWaysSpeed = 11f;
         //        float sideWaysSpeed = onGround ? 2.5f : 1.2f;
 
-        if (xa > 2)
+        if (xAcceleration > 2)
         {
             facing = 1;
         }
-        if (xa < -2)
+        if (xAcceleration < -2)
         {
             facing = -1;
         }
 
-        xa = facing * sideWaysSpeed;
+        xAcceleration = facing * sideWaysSpeed;
 
         if (facing != 0)
         {
@@ -166,28 +199,31 @@ public class ShellSim extends EnemySim implements Cloneable
             //Enemy.checkShellCollide(this);
         }
 
-        if (!move(xa, 0))
+        if (!move(xAcceleration, 0))
         {
             facing = -facing;
         }
         onGround = false;
-        move(0, ya);
+        move(0, yAcceleration);
 
-        ya *= 0.85f;
+        yAcceleration *= 0.85f;
         if (onGround)
         {
-            xa *= GROUND_INERTIA;
+            xAcceleration *= GROUND_INERTIA;
         } else
         {
-            xa *= AIR_INERTIA;
+            xAcceleration *= AIR_INERTIA;
         }
 
         if (!onGround)
         {
-            ya += yaa;
+            yAcceleration += yaa;
         }
     }
 
+    /* (non-Javadoc)
+     * @see competition.uu2013.common.Sprites.EnemySim#move(float, float)
+     */
     public boolean move(float xa, float ya)
     {
         while (xa > 8)
@@ -214,33 +250,33 @@ public class ShellSim extends EnemySim implements Cloneable
         boolean collide = false;
         if (ya > 0)
         {
-            if (isBlocking(x + xa - width, y + ya, xa, 0)) collide = true;
-            else if (isBlocking(x + xa + width, y + ya, xa, 0)) collide = true;
-            else if (isBlocking(x + xa - width, y + ya + 1, xa, ya)) collide = true;
-            else if (isBlocking(x + xa + width, y + ya + 1, xa, ya)) collide = true;
+            if (isBlocking(xLocation + xa - width, yLocation + ya, xa, 0)) collide = true;
+            else if (isBlocking(xLocation + xa + width, yLocation + ya, xa, 0)) collide = true;
+            else if (isBlocking(xLocation + xa - width, yLocation + ya + 1, xa, ya)) collide = true;
+            else if (isBlocking(xLocation + xa + width, yLocation + ya + 1, xa, ya)) collide = true;
         }
         if (ya < 0)
         {
-            if (isBlocking(x + xa, y + ya - height, xa, ya)) collide = true;
-            else if (collide || isBlocking(x + xa - width, y + ya - height, xa, ya)) collide = true;
-            else if (collide || isBlocking(x + xa + width, y + ya - height, xa, ya)) collide = true;
+            if (isBlocking(xLocation + xa, yLocation + ya - height, xa, ya)) collide = true;
+            else if (collide || isBlocking(xLocation + xa - width, yLocation + ya - height, xa, ya)) collide = true;
+            else if (collide || isBlocking(xLocation + xa + width, yLocation + ya - height, xa, ya)) collide = true;
         }
         if (xa > 0)
         {
-            if (isBlocking(x + xa + width, y + ya - height, xa, ya)) collide = true;
-            if (isBlocking(x + xa + width, y + ya - height / 2, xa, ya)) collide = true;
-            if (isBlocking(x + xa + width, y + ya, xa, ya)) collide = true;
+            if (isBlocking(xLocation + xa + width, yLocation + ya - height, xa, ya)) collide = true;
+            if (isBlocking(xLocation + xa + width, yLocation + ya - height / 2, xa, ya)) collide = true;
+            if (isBlocking(xLocation + xa + width, yLocation + ya, xa, ya)) collide = true;
 
-            if (avoidCliffs && onGround && !map.isBlocking((int) ((x + xa + width) / 16), (int) ((y) / 16 + 1),ya))
+            if (avoidCliffs && onGround && !map.isBlocking((int) ((xLocation + xa + width) / 16), (int) ((yLocation) / 16 + 1),ya))
                 collide = true;
         }
         if (xa < 0)
         {
-            if (isBlocking(x + xa - width, y + ya - height, xa, ya)) collide = true;
-            if (isBlocking(x + xa - width, y + ya - height / 2, xa, ya)) collide = true;
-            if (isBlocking(x + xa - width, y + ya, xa, ya)) collide = true;
+            if (isBlocking(xLocation + xa - width, yLocation + ya - height, xa, ya)) collide = true;
+            if (isBlocking(xLocation + xa - width, yLocation + ya - height / 2, xa, ya)) collide = true;
+            if (isBlocking(xLocation + xa - width, yLocation + ya, xa, ya)) collide = true;
 
-            if (avoidCliffs && onGround && !map.isBlocking((int) ((x + xa - width) / 16), (int) ((y) / 16 + 1),ya))
+            if (avoidCliffs && onGround && !map.isBlocking((int) ((xLocation + xa - width) / 16), (int) ((yLocation) / 16 + 1),ya))
                 collide = true;
         }
 
@@ -248,38 +284,47 @@ public class ShellSim extends EnemySim implements Cloneable
         {
             if (xa < 0)
             {
-                x = (int) ((x - width) / 16) * 16 + width;
-                this.xa = 0;
+                xLocation = (int) ((xLocation - width) / 16) * 16 + width;
+                this.xAcceleration = 0;
             }
             if (xa > 0)
             {
-                x = (int) ((x + width) / 16 + 1) * 16 - width - 1;
-                this.xa = 0;
+                xLocation = (int) ((xLocation + width) / 16 + 1) * 16 - width - 1;
+                this.xAcceleration = 0;
             }
             if (ya < 0)
             {
-                y = (int) ((y - height) / 16) * 16 + height;
-                this.ya = 0;
+                yLocation = (int) ((yLocation - height) / 16) * 16 + height;
+                this.yAcceleration = 0;
             }
             if (ya > 0)
             {
-                y = (int) (y / 16 + 1) * 16 - 1;
+                yLocation = (int) (yLocation / 16 + 1) * 16 - 1;
                 onGround = true;
             }
             return false;
         } else
         {
-            x += xa;
-            y += ya;
+            xLocation += xa;
+            yLocation += ya;
             return true;
         }
     }
 
+    /**
+     * Checks if is blocking.
+     *
+     * @param _x the _x
+     * @param _y the _y
+     * @param xa the xa
+     * @param ya the ya
+     * @return true, if is blocking
+     */
     private boolean isBlocking(float _x, float _y, float xa, float ya)
     {
         int x = (int) (_x / 16);
         int y = (int) (_y / 16);
-        if (x == (int) (this.x / 16) && y == (int) (this.y / 16)) return false;
+        if (x == (int) (this.xLocation / 16) && y == (int) (this.yLocation / 16)) return false;
 
         boolean blocking = map.isBlocking(x, y,ya);
 
@@ -290,32 +335,44 @@ public class ShellSim extends EnemySim implements Cloneable
         return blocking;
     }
 
+    /* (non-Javadoc)
+     * @see competition.uu2013.common.Sprites.SpriteSim#bumpCheck(int, int)
+     */
     public void bumpCheck(int xTile, int yTile)
     {
-        if (x + width > xTile * 16 && x - width < xTile * 16 + 16 && yTile == (int) ((y - 1) / 16))
+        if (xLocation + width > xTile * 16 && xLocation - width < xTile * 16 + 16 && yTile == (int) ((yLocation - 1) / 16))
         {
             facing = -marioSim.getFacing();
-            ya = -10;
+            yAcceleration = -10;
         }
     }
 
+    /**
+     * Die.
+     */
     public void die()
     {
         dead = true;
 
         carried = false;
 
-        xa = -facing * 2;
-        ya = -5;
+        xAcceleration = -facing * 2;
+        yAcceleration = -5;
         deadTime = 100;
     }
 
+    /**
+     * Shell collide check.
+     *
+     * @param shell the shell
+     * @return true, if successful
+     */
     public boolean shellCollideCheck(ShellSim shell)
     {
         if (deadTime != 0) return false;
 
-        float xD = shell.getX() - x;
-        float yD = shell.getY() - y;
+        float xD = shell.getXLocation() - xLocation;
+        float yD = shell.getYLocation() - yLocation;
 
         if (xD > -16 && xD < 16)
         {
@@ -330,10 +387,13 @@ public class ShellSim extends EnemySim implements Cloneable
     }
 
 
+    /**
+     * Release.
+     */
     public void release()
     {
         carried = false;
         facing = marioSim.getFacing();
-        x += facing * 8;
+        xLocation += facing * 8;
     }
 }

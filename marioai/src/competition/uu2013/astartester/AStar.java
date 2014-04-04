@@ -2,35 +2,77 @@ package competition.uu2013.astartester;
 
 import java.util.*;
 
+/**
+ *  Simple A* algorithm that finds it way through a maze.  Created to 
+ *  test correctness of algorithm.
+ *  
+ *  @author Ciaran Kearney
+ *  @version 1.0
+ *  @since 17/01/2014
+ */
 public class AStar
 {
+    
+    /** The maze to exit. */
     private int [][] map;
+    
+    /** The algorithms current x location. */
     private int xLoc;
+    
+    /** The algorithms current x location. */
     private int yLoc;
+    
+    /** The target x location. */
     private int targetX;
+    
+    /** The target y location. */
     private int targetY;
+    
+    /** The open list. */
     private SortedList<Node> open;
+    
+    /** The closed list. */
     private SortedList<Node> closed;
+    
+    /** The plan. */
     private Stack<Node> plan;
 
+    /**
+     * The main method. launches a new instance of this class and 
+     * begins the search. 
+     *
+     * @param args not used.
+     */
     public static void  main(String args[])
     {
+    	//lets go from one end to the other
         AStar a = new AStar(8,1,1,8);
         a.search();
     }
 
 
+    /**
+     * Instantiates a new a star.
+     *
+     * @param y the y
+     * @param x the x
+     * @param tY the t y
+     * @param tX the t x
+     */
     AStar(int y, int x, int tY, int tX)
     {
+    	//set the target and start locations
         this.xLoc = x;
         this.yLoc = y;
         this.targetX = tX;
         this.targetY = tY;
 
+        //init our lists
         open = new SortedList<Node>();
         closed = new SortedList<Node>();
         plan = new Stack<Node>();
 
+        //create the map
         map = new int[10][];
         map[0] = new int[]{1,1,1,1,1,1,1,1,1,1};
         map[1] = new int[]{1,0,0,0,0,0,0,0,0,1};
@@ -44,43 +86,80 @@ public class AStar
         map[9] = new int[]{1,1,1,1,1,1,1,1,1,1};
     }
 
+    /**
+     *  THe A* search.
+     *
+     * @return true, because it is.
+     */
     private boolean search() {
+    	//create our starting node, calculate its cost and add it to the open list
         Node current = new Node(this.yLoc, this.xLoc);
         current.setGCost(0);
         open.add(current);
 
-        while (open.size() != 0) {
-
+        //while there are still nodes
+        while (open.size() != 0) 
+        {
+        	//grab the best node on the open list
             current = open.getFirst();
-
-            if (current.getXLoc() == this.targetX && current.getYLoc() == this.targetY) {
+            
+            //finish if this is the goal
+            if (current.getXLoc() == this.targetX && current.getYLoc() == this.targetY) 
+            {
                 return extractPlan(current);
             }
 
 
+            //add the node to the closed list
             open.remove(current);
             closed.add(current);
 
-            for (Node n : current.generateChildren(this.map)) {
+            //generate the successor nodes
+            for (Node n : current.generateChildren(this.map)) 
+            {
+            	
                 boolean isBetter;
 
-                if (closed.contains(n)) {
+                //if this node is on the closed list
+                if (closed.contains(n)) 
+                {
+                	//skip it
                     continue;
                 }
-                if (!n.isBlocked()) {
-                    if (!open.contains(n)) {
+                
+                //if we can access the node
+                if (!n.isBlocked()) 
+                {
+                	//if it's not on the open list
+                    if (!open.contains(n)) 
+                    {
+                    	//add it.
                         open.add(n);
+                        //we've found a possible successor
                         isBetter = true;
-                    } else if (n.getGCost() < current.getGCost()) {
+                    } 
+                    //if the node has a lower g cost, then it's a better path to this point
+                    else if (n.getGCost() < current.getGCost()) 
+                    {
                         isBetter = true;
-                    } else {
+                    } 
+                    else 
+                    {
+                    	//or not
                         isBetter = false;
                     }
-                    if (isBetter) {
+                    //if we found a successor
+                    if (isBetter) 
+                    {
+                    	//set this as the parent
                         n.setParent(current);
-                        if ((n.getXLoc() == current.getXLoc()) && (n.getYLoc() != current.getYLoc()) || ((n.getXLoc() != current.getXLoc()) && (n.getYLoc() == current.getXLoc()))) {
+                        //prefer going straight
+                        if ((n.getXLoc() == current.getXLoc()) && (n.getYLoc() != current.getYLoc()) || ((n.getXLoc() != current.getXLoc()) && (n.getYLoc() == current.getXLoc()))) 
+                        {
                             n.setGCost(current.getGCost() + 10);
-                        } else {
+                        } 
+                        else 
+                        {
                             n.setGCost(current.getGCost() + 14);
                         }
                         n.setEstimateHCost(this.targetX, this.targetY);
@@ -92,6 +171,13 @@ public class AStar
         return extractPlan(current);
     }
 
+    /**
+     * Extract's the plan for the algorithm by moving up 
+     * through pointers to the parent node 
+     *
+     * @param planNode the goal node
+     * @return true, we did it!
+     */
     private boolean extractPlan(Node planNode)
     {
 
@@ -104,6 +190,9 @@ public class AStar
         return true;
     }
 
+    /**
+     * Prints the plan to STDOUT.
+     */
     private void printPlan()
     {
 
@@ -136,47 +225,100 @@ public class AStar
     }
 }
 
+/**
+ * The nodes to be searched, implements Matches<T> 
+ * which is just an extension on Comparable 
+ * 
+ * @author Ciaran Kearney
+ *
+ */
 class Node implements Matches<Node>
 {
+	/** node locations */
     private int xLoc;
     private int yLoc;
+    
+    /** the parent node */
     private Node parent;
+    
+    
+    /** costs */
     private int gCost;
     private int hCost;
+    
+    /** is the node walkable */
     private boolean blocked;
 
+    /**
+     * Creates a new node with the specified
+     * X and Y locations
+     * 
+     * @param y
+     * @param x
+     */
     Node(int y, int x)
     {
         this.xLoc = x;
         this.yLoc = y;
     }
 
+    /**
+     * Sets the heuristic cost for a node 
+     * @param tX target x location
+     * @param tY target y location
+     */
     public void setEstimateHCost(int tX, int tY)
     {
         this.hCost = 10*(Math.abs(this.xLoc - tX) + Math.abs(this.yLoc - tY));
     }
 
+    /**
+     *  sets the g cost for a node
+     * @param cost the cost to set
+     */
     public void setGCost(int cost)
     {
         gCost = cost;
     }
 
-
+    /**
+     * Returns the heuristic cost for this node
+     * 
+     * @return the heuristic cost
+     */
     public int getFCost()
     {
         return this.gCost + this.hCost;
     }
 
+    /**
+     * Sets a new parent for this node
+     * 
+     * @param _parent the new parent
+     */
     public void setParent(Node _parent)
     {
         this.parent = _parent;
     }
 
+    /**
+     *  Returns the parent for this node
+     * @return the current parent
+     * 
+     */
     public Node getParent()
     {
         return this.parent;
     }
 
+    /**
+     * Compares the x and y locations of the passed in node to 
+     * determine if they are the same
+     * 
+     * @param m the node to match
+     * 
+     * @return true, if nodes match
+     */
     @Override
     public boolean matches(Node m)
     {
@@ -184,24 +326,42 @@ class Node implements Matches<Node>
     }
 
 
-    public SortedList<Node> generateChildren(int[][] _map) {
+    /**
+     * Generates the successor nodes for this instance
+     * 
+     * @param _map the map on which the node exists
+     * 
+     * @return a list of the nodes successors
+     */
+    public SortedList<Node> generateChildren(int[][] _map) 
+    {
+    	//create our list
         SortedList<Node> children = new SortedList<Node>();
 
         for (int y = yLoc - 1; y <= yLoc + 1; y++)
         {
             for (int x = xLoc - 1; x <= xLoc + 1; x++)
             {
+            	//dont go outside the map
                 if (!(x<0) && !(y<0) && !(x > _map[0].length-1) && !(y > _map.length-1))
                 {
+                	//create new node, set this node as the parent and determine if it is
+                	//walkable
                     Node n = new Node(y, x);
                     n.setParent(this);
                     n.setBlocked(_map[y][x] == 1);
-                    if ((x == xLoc) && (y != yLoc) || ((x != xLoc) && (y == yLoc))) {
+                    //set the g cost for the node
+                    if ((x == xLoc) && (y != yLoc) || ((x != xLoc) && (y == yLoc))) 
+                    {
                         n.setGCost(this.gCost + 10);
-                    } else {
+                    } 
+                    else 
+                    {
                         n.setGCost(this.gCost + 14);
                     }
-                    if (x != this.xLoc || y != this.yLoc) {
+                    //set this node as the parent
+                    if (x != this.xLoc || y != this.yLoc) 
+                    {
                         children.add(n);
                     }
                 }
@@ -210,6 +370,13 @@ class Node implements Matches<Node>
         return children;
     }
 
+    /**
+     * compares this node to the passed in node, compares 
+     * by heuristic cost
+     * 
+     * @param newNode, the node to compare to 
+     * @return -1 if node has lower cost
+     */
     @Override
     public int compareTo(Node newNode)
     {
@@ -227,65 +394,128 @@ class Node implements Matches<Node>
         }
     }
 
-    public int getGCost() {
+    /**
+     * Returns the g cost for the node
+     * @return nodes g cost
+     */
+    public int getGCost() 
+    {
         return gCost;
     }
 
-    public void setBlocked(boolean blocked) {
+    /**
+     * Sets the nodes walkable status
+     * 
+     * @param blocked, false if node is walkable
+     */
+    public void setBlocked(boolean blocked) 
+    {
         this.blocked = blocked;
     }
 
-    public boolean isBlocked() {
+    /**
+     * Returns the walkable status for this node 
+     * @return false if node is walkable
+     */
+    public boolean isBlocked() 
+    {
         return blocked;
     }
 
+    /** 
+     * get the node x location
+     * @return node x location
+     */
     public int getXLoc()
     {
         return this.xLoc;
     }
 
+    /** 
+     * get the node y location
+     * @return node y location
+     */
     public int getYLoc()
     {
         return yLoc;
     }
 }
 
+/**
+ * Wrapper around the ArrayList class to sort nodes as they are added
+ * 
+ * @author Ciaran Kearney
+ *
+ */
 class SortedList<T extends Matches<T>> implements Iterable<T>
 {
+	/** The actual list	 */
     private ArrayList<T> list;
-    private T node;
 
+    /**
+     *  Creates a new SortedList
+     */
     public SortedList()
     {
         list = new ArrayList<T>();
     }
 
+    /**
+     * Returns the first item in the list
+     * 
+     * @return the first list item
+     */
     public T getFirst()
     {
         return list.get(0);
     }
 
+    /**
+     * Empties the list
+     */
     public void clear()
     {
         list.clear();
     }
 
+    /**
+     * Adds an element to the list and sorts it into position
+     * 
+     * @param element the element to add
+     */
     public void add(T element)
     {
         list.add(element);
         Collections.sort(list, new SortedListComparator());
     }
 
+    /**
+     * Removes an element from the list
+     * 
+     * @param element the element to remove
+     */
     public void remove(T element)
     {
         list.remove(element);
     }
 
+    /**
+     * Gets the size of the list
+     *  
+     * @return the current number of list members
+     */
     public int size()
     {
         return list.size();
     }
 
+    /**
+     * Checks if an element is on the list
+     * 
+     * @param element the element to check
+     * 
+     * @return true, if found
+     */
     public boolean contains(T element)
     {
         for (T t : list)
@@ -298,11 +528,23 @@ class SortedList<T extends Matches<T>> implements Iterable<T>
         return false;
     }
 
+    /**
+     * Returns the actual list
+     * 
+     * @return
+     */
     public ArrayList<T> getList()
     {
         return this.list;
     }
 
+    /**
+     * Reduces the size of the list by the specified 
+     * number, elements at the end of the list are 
+     * removed.
+     * 
+     * @param newSize the new list size
+     */
     public void prune(int newSize)
     {
 
@@ -312,11 +554,23 @@ class SortedList<T extends Matches<T>> implements Iterable<T>
         }
     }
 
+    /**
+     * Adds a collection of nodes to the list and
+     * resorts
+     * 
+     * @param nodes
+     */
     public void addAll(ArrayList<T> nodes)
     {
         list.addAll(nodes);
+        Collections.sort(this.list);
     }
 
+    /**
+     * Returns the iterator for the list
+     * 
+     *  @return The iterator
+     */
     @Override
     public Iterator iterator()
     {
@@ -333,6 +587,12 @@ class SortedList<T extends Matches<T>> implements Iterable<T>
         }
     }
 }
+
+/** 
+ * Matches, extends comparable to add another
+ * method signature
+ *  
+ */
 
 interface Matches<T> extends Comparable<T>
 {

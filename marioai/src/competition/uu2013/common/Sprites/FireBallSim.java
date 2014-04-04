@@ -2,6 +2,7 @@ package competition.uu2013.common.Sprites;
 
 import competition.uu2013.common.level.Map;
 
+// TODO: Auto-generated Javadoc
 /**
  * Created with IntelliJ IDEA.
  * User: fluffy
@@ -12,32 +13,46 @@ import competition.uu2013.common.level.Map;
 public class FireBallSim extends EnemySim implements Cloneable
 {
 
+    /** The fireball ground inertia. */
     private static float FIREBALL_GROUND_INERTIA = 0.89f;
+    
+    /** The fireball air inertia. */
     private static float FIREBALL_AIR_INERTIA = 0.89f;
 
+    /**
+     * Instantiates a new fire ball sim.
+     *
+     * @param _x the _x
+     * @param _y the _y
+     * @param _type the _type
+     * @param dir the dir
+     */
     public FireBallSim(float _x, float _y, int _type, int dir)
     {
         super(_x, _y, _type);
 
-        this.x = _x;
-        this.y = _y;
+        this.xLocation = _x;
+        this.yLocation = _y;
 
         height = 8;
-        ya = 5.3F;
-        xa = 7.12F;
+        yAcceleration = 5.3F;
+        xAcceleration = 7.12F;
         facing = dir;
     }
 
+    /* (non-Javadoc)
+     * @see competition.uu2013.common.Sprites.EnemySim#clone()
+     */
     @Override
     public FireBallSim clone() throws CloneNotSupportedException
     {
-        FireBallSim n = new FireBallSim(this.x, this.y, this.type, this.facing);
-        n.x = this.x;
-        n.y = this.y;
-        n.xa = this.xa;
-        n.ya = this.ya;
+        FireBallSim n = new FireBallSim(this.xLocation, this.yLocation, this.simType, this.facing);
+        n.xLocation = this.xLocation;
+        n.yLocation = this.yLocation;
+        n.xAcceleration = this.xAcceleration;
+        n.yAcceleration = this.yAcceleration;
         n.facing = this.facing;
-        n.type = this.type;
+        n.simType = this.simType;
         n.lastX = this.lastX;
         n.lastY = this.lastY;
         n.height = this.height;
@@ -59,13 +74,16 @@ public class FireBallSim extends EnemySim implements Cloneable
         return n;
     }
 
+    /* (non-Javadoc)
+     * @see competition.uu2013.common.Sprites.EnemySim#move()
+     */
     public void move()
     {
-        if (xa > 0)
+        if (xAcceleration > 0)
         {
             facing = 1;
         }
-        else if (xa < 0)
+        else if (xAcceleration < 0)
         {
             facing = -1;
         }
@@ -78,44 +96,47 @@ public class FireBallSim extends EnemySim implements Cloneable
         float sideWaysSpeed = 8f;
         //        float sideWaysSpeed = onGround ? 2.5f : 1.2f;
 
-        if (xa > 2)
+        if (xAcceleration > 2)
         {
             facing = 1;
         }
-        if (xa < -2)
+        if (xAcceleration < -2)
         {
             facing = -1;
         }
 
-        xa = facing * sideWaysSpeed;
+        xAcceleration = facing * sideWaysSpeed;
 
         //TODO:
         //Enemy.checkFireballCollide(this);
 
-        if (!move(xa, 0))
+        if (!move(xAcceleration, 0))
         {
             die();
         }
 
         onGround = false;
-        move(0, ya);
-        if (onGround) ya = -10;
+        move(0, yAcceleration);
+        if (onGround) yAcceleration = -10;
 
-        ya *= 0.95f;
+        yAcceleration *= 0.95f;
         if (onGround)
         {
-            xa *= FIREBALL_GROUND_INERTIA;
+            xAcceleration *= FIREBALL_GROUND_INERTIA;
         } else
         {
-            xa *= FIREBALL_AIR_INERTIA;
+            xAcceleration *= FIREBALL_AIR_INERTIA;
         }
 
         if (!onGround)
         {
-            ya += 1.5;
+            yAcceleration += 1.5;
         }
     }
 
+    /* (non-Javadoc)
+     * @see competition.uu2013.common.Sprites.EnemySim#move(float, float)
+     */
     public boolean move(float xa, float ya)
     {
         while (xa > 8)
@@ -142,33 +163,33 @@ public class FireBallSim extends EnemySim implements Cloneable
         boolean collide = false;
         if (ya > 0)
         {
-            if (isBlocking(x + xa - width, y + ya, xa, 0)) collide = true;
-            else if (isBlocking(x + xa + width, y + ya, xa, 0)) collide = true;
-            else if (isBlocking(x + xa - width, y + ya + 1, xa, ya)) collide = true;
-            else if (isBlocking(x + xa + width, y + ya + 1, xa, ya)) collide = true;
+            if (isBlocking(xLocation + xa - width, yLocation + ya, xa, 0)) collide = true;
+            else if (isBlocking(xLocation + xa + width, yLocation + ya, xa, 0)) collide = true;
+            else if (isBlocking(xLocation + xa - width, yLocation + ya + 1, xa, ya)) collide = true;
+            else if (isBlocking(xLocation + xa + width, yLocation + ya + 1, xa, ya)) collide = true;
         }
         if (ya < 0)
         {
-            if (isBlocking(x + xa, y + ya - height, xa, ya)) collide = true;
-            else if (collide || isBlocking(x + xa - width, y + ya - height, xa, ya)) collide = true;
-            else if (collide || isBlocking(x + xa + width, y + ya - height, xa, ya)) collide = true;
+            if (isBlocking(xLocation + xa, yLocation + ya - height, xa, ya)) collide = true;
+            else if (collide || isBlocking(xLocation + xa - width, yLocation + ya - height, xa, ya)) collide = true;
+            else if (collide || isBlocking(xLocation + xa + width, yLocation + ya - height, xa, ya)) collide = true;
         }
         if (xa > 0)
         {
-            if (isBlocking(x + xa + width, y + ya - height, xa, ya)) collide = true;
-            if (isBlocking(x + xa + width, y + ya - height / 2, xa, ya)) collide = true;
-            if (isBlocking(x + xa + width, y + ya, xa, ya)) collide = true;
+            if (isBlocking(xLocation + xa + width, yLocation + ya - height, xa, ya)) collide = true;
+            if (isBlocking(xLocation + xa + width, yLocation + ya - height / 2, xa, ya)) collide = true;
+            if (isBlocking(xLocation + xa + width, yLocation + ya, xa, ya)) collide = true;
 
-            if (avoidCliffs && onGround && !map.isBlocking((int) ((x + xa + width) / 16), (int) ((y) / 16 + 1),ya))
+            if (avoidCliffs && onGround && !map.isBlocking((int) ((xLocation + xa + width) / 16), (int) ((yLocation) / 16 + 1),ya))
                 collide = true;
         }
         if (xa < 0)
         {
-            if (isBlocking(x + xa - width, y + ya - height, xa, ya)) collide = true;
-            if (isBlocking(x + xa - width, y + ya - height / 2, xa, ya)) collide = true;
-            if (isBlocking(x + xa - width, y + ya, xa, ya)) collide = true;
+            if (isBlocking(xLocation + xa - width, yLocation + ya - height, xa, ya)) collide = true;
+            if (isBlocking(xLocation + xa - width, yLocation + ya - height / 2, xa, ya)) collide = true;
+            if (isBlocking(xLocation + xa - width, yLocation + ya, xa, ya)) collide = true;
 
-            if (avoidCliffs && onGround && !map.isBlocking((int) ((x + xa - width) / 16), (int) ((y) / 16 + 1),ya))
+            if (avoidCliffs && onGround && !map.isBlocking((int) ((xLocation + xa - width) / 16), (int) ((yLocation) / 16 + 1),ya))
                 collide = true;
         }
 
@@ -176,38 +197,47 @@ public class FireBallSim extends EnemySim implements Cloneable
         {
             if (xa < 0)
             {
-                x = (int) ((x - width) / 16) * 16 + width;
-                this.xa = 0;
+                xLocation = (int) ((xLocation - width) / 16) * 16 + width;
+                this.xAcceleration = 0;
             }
             if (xa > 0)
             {
-                x = (int) ((x + width) / 16 + 1) * 16 - width - 1;
-                this.xa = 0;
+                xLocation = (int) ((xLocation + width) / 16 + 1) * 16 - width - 1;
+                this.xAcceleration = 0;
             }
             if (ya < 0)
             {
-                y = (int) ((y - height) / 16) * 16 + height;
-                this.ya = 0;
+                yLocation = (int) ((yLocation - height) / 16) * 16 + height;
+                this.yAcceleration = 0;
             }
             if (ya > 0)
             {
-                y = (int) (y / 16 + 1) * 16 - 1;
+                yLocation = (int) (yLocation / 16 + 1) * 16 - 1;
                 onGround = true;
             }
             return false;
         } else
         {
-            x += xa;
-            y += ya;
+            xLocation += xa;
+            yLocation += ya;
             return true;
         }
     }
 
+    /**
+     * Checks if is blocking.
+     *
+     * @param _x the _x
+     * @param _y the _y
+     * @param xa the xa
+     * @param ya the ya
+     * @return true, if is blocking
+     */
     private boolean isBlocking(float _x, float _y, float xa, float ya)
     {
         int x = (int) (_x / 16);
         int y = (int) (_y / 16);
-        if (x == (int) (this.x / 16) && y == (int) (this.y / 16)) return false;
+        if (x == (int) (this.xLocation / 16) && y == (int) (this.yLocation / 16)) return false;
 
         boolean blocking = map.isBlocking(x, y,ya);
 
@@ -216,15 +246,21 @@ public class FireBallSim extends EnemySim implements Cloneable
         return blocking;
     }
 
+    /**
+     * Die.
+     */
     public void die()
     {
         dead = true;
 
-        xa = -facing * 2;
-        ya = -5;
+        xAcceleration = -facing * 2;
+        yAcceleration = -5;
         deadTime = 100;
     }
 
+    /* (non-Javadoc)
+     * @see competition.uu2013.common.Sprites.EnemySim#checkFireballCollide(competition.uu2013.common.Sprites.FireBallSim)
+     */
     @Override
     public boolean checkFireballCollide(FireBallSim fireBallSim)
     {

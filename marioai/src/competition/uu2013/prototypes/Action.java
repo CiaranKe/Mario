@@ -218,6 +218,11 @@ public class Action
         {
             value = "LEFT_JUMP_SPEED";
         }
+
+        else
+        {
+            value = "WAIT";
+        }
         if (value.length() > 15)
         {
             return value;

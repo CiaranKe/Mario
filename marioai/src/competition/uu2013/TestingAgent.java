@@ -1,21 +1,13 @@
 package competition.uu2013;
 
 import ch.idsia.agents.Agent;
-import ch.idsia.benchmark.mario.engine.GlobalOptions;
-import ch.idsia.benchmark.mario.engine.sprites.Mario;
 import ch.idsia.benchmark.mario.environments.Environment;
-import competition.uu2013.common.level.Enemy;
-import competition.uu2013.common.level.Map;
-import competition.uu2013.common.Sprites.SpriteSim;
 import competition.uu2013.common.level.WorldSim;
-import competition.uu2013.common.Sprites.EnemySim;
-import competition.uu2013.common.Sprites.MarioSim;
+import competition.uu2013.prototypes.MarioAIAgent;
 
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintStream;
-import java.math.BigDecimal;
-import java.util.ArrayList;
 
 public class TestingAgent extends MarioAIAgent implements Agent
 {
@@ -35,18 +27,16 @@ public class TestingAgent extends MarioAIAgent implements Agent
     @Override
     public boolean [] getAction()
     {
+        return new boolean[Environment.numberOfKeys];
+        /*
 
         //TODO: Mis-predicting stomps, can't see actual bytes for map tiles, so can't predict all collisions.
         //TODO: Fireballs
         //TODO: Hidden blocks, knock our positioning off.
 
-
-
-
-
-
         long startTime = System.currentTimeMillis();
         System.out.println("============================================================================================");
+
         //--------------------------------------------------------------------------------------------------
         if (worldSim == null)
         {
@@ -135,6 +125,7 @@ public class TestingAgent extends MarioAIAgent implements Agent
         System.out.println("Method Time: " + (System.currentTimeMillis() - startTime));
         System.out.println("============================================================================================");
         return action;
+         */
     }
 
 

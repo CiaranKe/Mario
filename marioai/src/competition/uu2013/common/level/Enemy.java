@@ -6,23 +6,32 @@ import competition.uu2013.common.Sprites.*;
 import java.util.ArrayList;
 
 /**
- * Created with IntelliJ IDEA.
- * User: fluffy
- * Date: 27/01/14
- * Time: 15:22
- * To change this template use File | Settings | File Templates.
+ * Enemy class, contains a list of all the on screen 
+ * enemies, and operations upon them.  Cloneable,
+ * each instance of this class is contained
+ * inside a WorldSim.
+ * 
  */
 public class Enemy implements Cloneable
 {
 
+    /** The enemies list. */
     private ArrayList<SpriteSim> enemiesList;
 
 
+    /**
+     * Instantiates a new enemy.
+     */
     public Enemy() //Fight the power!!
     {
         enemiesList = new ArrayList<SpriteSim>();
     }
 
+    /** 
+     * Clones this class creating a copy of the 
+     * current on screen enemies to work with
+     * @see java.lang.Object#clone()
+     */
     @Override
     public Enemy clone() throws CloneNotSupportedException
     {
@@ -42,6 +51,13 @@ public class Enemy implements Cloneable
         return e;
     }
 
+    /**
+     * Clone enemies, returns a new copy of the enemies list, allowing destructive
+     * operations without changing this instance's list.  Used for debugging.
+     *
+     * @return the array list
+     * @throws CloneNotSupportedException the clone not supported exception
+     */
     public ArrayList<SpriteSim> cloneEnemies() throws CloneNotSupportedException
     {
         ArrayList<SpriteSim> enemyCopy = new ArrayList<SpriteSim>();
@@ -58,6 +74,17 @@ public class Enemy implements Cloneable
         return enemyCopy;
     }
 
+    /**
+     * Determines if an on screen enemy is within the receptive field. Allows the
+     * sim to determine if the enemy can be accurately modelled
+     *
+     * @param marioX Mario's X location
+     * @param marioY Mario's Y location
+     * @param halfSceneWidth the distance mario can see ahead/behind
+     * @param halfSceneHeight the distance mario can see up/down
+     * @param sim the enemy to check
+     * @return true, if in scope
+     */
     public static boolean withinScope(float marioX, float marioY, int halfSceneWidth, int halfSceneHeight, EnemySim sim)
     {
         float lookAHead = marioX + (halfSceneWidth * 16);
@@ -65,107 +92,103 @@ public class Enemy implements Cloneable
         float lookBehind = marioX - (halfSceneWidth * 16);
         float lookAbove = marioY - (halfSceneHeight * 16);
 
-        if ((sim.getX() < lookAHead) && (sim.getY() < lookBelow) && (sim.getX() > lookBehind) && (sim.getY() > lookAbove))
+        if ((sim.getXLocation() < lookAHead) && (sim.getYLocation() < lookBelow) && (sim.getXLocation() > lookBehind) && (sim.getYLocation() > lookAbove))
         {
             return true;
         }
         return false;
     }
 
-    public boolean setEnemies(float [] enemies, float marioX, float marioY, int sceneWidth)
+    /**
+     * Updates the locations of on screen enemies, attempts to guess the enemies 
+     * X and Y acceleration.  
+     *
+     * @param enemies the enemy location array
+     * @param marioX mario's x location
+     * @param marioY mario's y location
+     * @param sceneWidth the scene width
+     * @param _sim the current marioSim
+     * @return true, if a new enemy found or lost sync with an enemy position (search re-plans if true)
+     */
+    public boolean setEnemies(float [] enemies, float marioX, float marioY, int sceneWidth, MarioSim _sim)
     {
-
-        /*
-        if (!winged)
-        {
-	        xa = (lastX - x) *0.89F;
-	        if ((lastY - y) > 0)
-	        {
-		        ya = lastY - y) * 0.85F +2;
-	        }
-	        else
-	        {
-		        ya = lastYA * 0.85F;
-	        }
-        }
-        else
-        {
-	        ya = (y - lastY) *0.89F + 0.6F;
-        }
-        */
+    	//our new enemy list
         ArrayList<SpriteSim> newSprites = new ArrayList<SpriteSim>();
-
-
         boolean newEnemiesFound = false;
 
+        //parse over the list of enemies
         for (int i = 0; i < enemies.length; i += 3)
         {
-            SpriteSim newEnemy = this.createEnemy((marioX + enemies[i+1]),(marioY + enemies[i+2]),(int)enemies[i]);
-            //System.out.println("Actu: Type (" + this.nameEnemy((int)enemies[i])  + "):" + (int)enemies[i] + " X: " + (marioX + enemies[i+1]) + " Y: " + (marioY + enemies[i+2]));
-
-
-            if (newEnemy.getType() == -1 || newEnemy.getType() == 15)
-                continue;
-
-            // is there already an enemy here?
+        	//create a Sprite for each instance, (positions are relative to mario so we need to add this to get the true value)
+            SpriteSim newEnemy = this.createEnemy((marioX + enemies[i+1]),(marioY + enemies[i+2]),(int)enemies[i], _sim);
+            
+            //ignore flowers
+            if (newEnemy.getType() == -1 || newEnemy.getType() == Sprite.KIND_FIRE_FLOWER)
+            {
+            	continue;
+            }
+                
+            //Enemies don't move more than 2px per frame (I hope), so they should be in this distance.
             float maxDelta = 2.01f * 1.75f;
             boolean enemyFound = false;
+            
+            //iterate over each of the current enemies
             for (SpriteSim sprite:enemiesList)
             {
-                //System.out.println("Sim: Type (" + Enemy.nameEnemy(sprite.getType()) + "):" + sprite.getType() + " X: " + sprite.getX() + " Y: " + sprite.getY() + " XA: " + ((EnemySim) sprite).getXA() + " YA: " + ((EnemySim) sprite).getYA() + " Facing" + ((EnemySim) sprite).getFacing());
-
+                //does this enemy match the type? and are they within range?
                 if (sprite.getType() == newEnemy.getType()
-                        && Math.abs(sprite.getX() - newEnemy.getX()) < maxDelta
-                        && ((Math.abs(sprite.getY() - newEnemy.getY()) < maxDelta) || sprite.getType() == Sprite.KIND_ENEMY_FLOWER))
+                        && Math.abs(sprite.getXLocation() - newEnemy.getXLocation()) < maxDelta
+                        && ((Math.abs(sprite.getYLocation() - newEnemy.getYLocation()) < maxDelta) || sprite.getType() == Sprite.KIND_ENEMY_FLOWER))
                 {
-                    if (Math.abs(sprite.getX() - newEnemy.getX()) > 0)
+                	//has the enemy moved?
+                    if (Math.abs(sprite.getXLocation() - newEnemy.getXLocation()) > 0)
                     {
+                    	//set the enemies direction
                         ((EnemySim)sprite).setFacing(sprite.getFacing() * -1);
                         newEnemiesFound = true;
-                        ((EnemySim) sprite).setX(newEnemy.getX());
+                        ((EnemySim) sprite).setX(newEnemy.getXLocation());
                     }
-                    if ((sprite.getY() - newEnemy.getY()) != 0 && sprite.getType() == Sprite.KIND_ENEMY_FLOWER)
+                    //update the position of flowers
+                    if ((sprite.getYLocation() - newEnemy.getYLocation()) != 0 && sprite.getType() == Sprite.KIND_ENEMY_FLOWER)
                     {
-                        ((EnemySim) sprite).setYA((newEnemy.getY() - ((EnemySim) sprite).getAccurateY()) * 0.89f);//+= sprite.y - y;
-                        ((EnemySim) sprite).setY(newEnemy.getY());
+                        ((EnemySim) sprite).setYA((newEnemy.getYLocation() - ((EnemySim) sprite).getAccurateY()) * 0.89f /* MAGIC NUMBER */ );
+                        ((EnemySim) sprite).setY(newEnemy.getYLocation());
                     }
                     enemyFound = true;
                 }
-
-                if (sprite.getType() == newEnemy.getType() &&  (sprite.getX() - newEnemy.getX()) == 0 && (sprite.getY() - newEnemy.getY()) != 0
-                        &&  Math.abs(sprite.getY() - newEnemy.getY()) < 8 && sprite.getType() != Sprite.KIND_SHELL &&
+                //X is correct, Y is wrong, this is a flying enemy
+                if (sprite.getType() == newEnemy.getType() &&  (sprite.getXLocation() - newEnemy.getXLocation()) == 0 && (sprite.getYLocation() - newEnemy.getYLocation()) != 0
+                        &&  Math.abs(sprite.getYLocation() - newEnemy.getYLocation()) < 8 && sprite.getType() != Sprite.KIND_SHELL &&
                         sprite.getType() != Sprite.KIND_BULLET_BILL && ((EnemySim) sprite).isWinged())
                 {
-
-
-                    ((EnemySim) sprite).setYA((newEnemy.getY() - ((EnemySim) sprite).getAccurateY()) * 0.95f + 0.6f); // / 0.89f;
-                    ((EnemySim) sprite).setY(newEnemy.getY());
+                	
+                    ((EnemySim) sprite).setYA((newEnemy.getYLocation() - ((EnemySim) sprite).getAccurateY()) * 0.95f + 0.6f /* MAGIC NUMBER */); 
+                    ((EnemySim) sprite).setY(newEnemy.getYLocation());
                     ((EnemySim)sprite).setKnownYA(true);
                     enemyFound = true;
                     newEnemiesFound = true;
                 }
-                if (sprite.getType() == newEnemy.getType() && (sprite.getX() - newEnemy.getX()) == 0 && (sprite.getY() - newEnemy.getY()) != 0 &&
-                        Math.abs(sprite.getY() - newEnemy.getY()) <= 2 && ((EnemySim)sprite).isYAUnknown() && ((EnemySim) sprite).getAccurateY() != 0)
+                //enemy falling off a ledge
+                if (sprite.getType() == newEnemy.getType() && (sprite.getXLocation() - newEnemy.getXLocation()) == 0 && (sprite.getYLocation() - newEnemy.getYLocation()) != 0 &&
+                        Math.abs(sprite.getYLocation() - newEnemy.getYLocation()) <= 2 && ((EnemySim)sprite).isYAUnknown() && ((EnemySim) sprite).getAccurateY() != 0)
                 {
 
-                    ((EnemySim) sprite).setYA(newEnemy.getY() - ((EnemySim) sprite).getAccurateY() * 0.85f + 2); // / 0.89f;
-                    ((EnemySim) sprite).setY(newEnemy.getY());
+                    ((EnemySim) sprite).setYA(newEnemy.getYLocation() - ((EnemySim) sprite).getAccurateY() * 0.85f + 2 /* MAGIC NUMBER */); 
+                    ((EnemySim) sprite).setY(newEnemy.getYLocation());
 
                     ((EnemySim) sprite).setKnownYA(false);
                     enemyFound = true;
                 }
-
-
-
+                //Existing enemy found
                 if (enemyFound)
                 {
                     newSprites.add(sprite);
-                    ((EnemySim) sprite).setAccurateX(newEnemy.getX());
-                    ((EnemySim) sprite).setAccurateY(newEnemy.getY());
+                    ((EnemySim) sprite).setAccurateXLocation(newEnemy.getXLocation());
+                    ((EnemySim) sprite).setAccurateYLocation(newEnemy.getYLocation());
 
                     if (newEnemiesFound && ((EnemySim) sprite).withinScope(marioX,marioY, sceneWidth, sceneWidth))
                     {
-                        System.out.println("LOST ENEMY SYNC!");
+                        //System.out.println("LOST ENEMY SYNC!");
                     }
                     else
                     {
@@ -173,211 +196,63 @@ public class Enemy implements Cloneable
                     }
                     if (((EnemySim) sprite).newWithinScope(marioX,marioY,sceneWidth,sceneWidth))
                     {
-                        System.out.println("ENEMY IN SCOPE!");
+                        //System.out.println("ENEMY IN SCOPE!");
                         newEnemiesFound = true;
                     }
                     break;
                 }
             }
+            //found a new enemy
             if (!enemyFound)
             {
-                System.out.println("NEW ENEMY!");
+                //System.out.println("NEW ENEMY!");
                 newEnemiesFound = true;
                     // Add new enemy to the system.
                 ((EnemySim)newEnemy).setXA(2);
-                ((EnemySim)newEnemy).setAccurateX(newEnemy.getX());
-                ((EnemySim)newEnemy).setAccurateY(newEnemy.getY());
+                ((EnemySim)newEnemy).setAccurateXLocation(newEnemy.getXLocation());
+                ((EnemySim)newEnemy).setAccurateYLocation(newEnemy.getYLocation());
                 ((EnemySim)newEnemy).newWithinScope(marioX,marioY,sceneWidth,sceneWidth);
                 newSprites.add(newEnemy);
             }
         }
-
-
-
+        //replace our current enemies list
         enemiesList = newSprites;
         return newEnemiesFound;
-
-        /*
-        EnemySim sim = this.createEnemy((marioX + enemyObservation[x+1]), (marioY + enemyObservation[x+2]), (int)enemyObservation[x]);
-            //check for existing enemy
-            boolean foundOne = false;
-            System.out.println("Actu: Type (" + this.nameEnemy((int)enemyObservation[x])  + "):" + (int)enemyObservation[x] + " X: " + (marioX + enemyObservation[x+1]) + " Y: " + (marioY + enemyObservation[x+2]));
-
-            for (EnemySim e: enemiesList)
-            {
-                //check the types match
-                if (e.getType() == sim.getType())
-                {
-                    //update the sim position
-                    System.out.println("Sim: Type (" + Enemy.nameEnemy(e.getType())  + "):" + e.getType() + " X: "+ e.getX() + " Y: " + e.getY() + " XA: " + e.getXA() + " YA: " + e.getYA()  +" Facing" + e.getFacing());
-                    float maxDelta = 2.01F * EnemySim.SIDE_WAY_SPEED; //two pixel diff
-
-                    //is the enemy close enough?
-                    if ((Math.abs(e.getX() - sim.getX()) == 0) && (Math.abs(e.getY() - sim.getY()) == 0))
-                    {
-                        System.out.println("Exact Match");
-                        foundOne = true;
-                    }
-
-                    else if ((Math.abs(e.getX() - sim.getX()) < maxDelta) && (Math.abs(e.getY() - sim.getY()) < maxDelta))
-                    {
-                        System.out.println("XY inside range");
-                        //x position is off
-                        if (Math.abs(e.getX() - sim.getX()) > 0)
-                        {
-                            System.out.println("X is off");
-                            e.setFacing(e.getFacing() * -1);
-                            e.setXA((e.getAccurateX() - sim.getX()) * 0.89F);
-                            e.setFacing((e.getAccurateX() - sim.getX()) * 0.89F > 0 ? 1 : -1);
-                            e.setX(sim.getX());
-                            foundOne = true;
-                        }
-                        //Y off by less than 8 and winged;
-                        if ((Math.abs(e.getY() - sim.getY()) < 8) && e.isWinged())
-                        {
-                            System.out.println("Winged");
-                            e.setYA((sim.getY() - e.getAccurateY()) *0.95F +0.6F );
-                            e.setY(sim.getY());
-                            foundOne = true;
-                        }
-                        //not a winged creature
-                        if ((Math.abs(e.getY() - sim.getY()) <=2) && (Math.abs(e.getY() - sim.getY()) !=0))
-                        {
-                            System.out.println("Y off, <2");
-                            if (Math.abs(e.getAccurateY() - sim.getY()) > 0)
-                            {
-                                System.out.println("Y Accurate off");
-                                e.setYA((e.getAccurateY() - sim.getY()) * 0.85F + 2);
-                                e.setY(sim.getY());
-                            }
-                            else
-                            {
-                                System.out.println("Updating YA");
-                                e.setYA(e.getYA() * 0.85F);
-                                e.setY(sim.getY());
-                            }
-                            foundOne = true;
-                        }
-
-                    }
-                }
-                if (foundOne)
-                {
-                    System.out.println("Updating!");
-                    e.setAccurateY(sim.getY());
-                    e.setAccurateX(sim.getX());
-                    newEnemies.add(e);
-                    break;
-                }
-            }
-            if(!foundOne)
-            {
-                System.out.println("Adding!");
-                sim.setXA(2);
-                sim.setAccurateY(sim.getY());
-                sim.setAccurateX(sim.getX());
-                sim.drop();
-                newEnemies.add(sim);
-            }
-            */
-
-            /*
-            for (EnemySim e: enemiesList)
-                {
-                e.move();
-                System.out.println("Post: Type (" + Enemy.nameEnemy(e.getType())  + "):" + e.getType() + " X: "+ e.getX() + " Y: " + e.getY() + " XA: " + e.getXA() + " YA: " + e.getYA() );
-                if (e.getType() == sim.getType())
-                {
-                    float maxDelta = 2.01F * EnemySim.SIDE_WAY_SPEED; //two pixel diff
-
-                    System.out.println("X Match (Delta): " + (Math.abs(e.getX() - sim.getX()) < maxDelta));
-                    System.out.println("Y Match (Delta): " + (Math.abs(e.getY() - sim.getY()) < maxDelta));
-                    if ((Math.abs(e.getX() - sim.getX()) < maxDelta) && (Math.abs(e.getY() - sim.getY()) < maxDelta))
-                    {
-                        //System.out.println("X is off by: " + Math.abs(e.getX() - sim.getX()));
-                        if (Math.abs(e.getX() - sim.getX()) > 0 )
-                        {
-                            e.setFacing(e.getFacing() * -1);
-                            e.setX(sim.getX());
-                            foundOne = true;
-                        }
-
-                        //System.out.println("Exact X match: " + (Math.abs(e.getX() - sim.getX())== 0));
-                        //System.out.println("Y Doesn't match:" + (Math.abs(e.getY() - sim.getY()) != 0));
-                        //System.out.println("Y off by less than 10:" + (Math.abs(e.getY() - sim.getY()) < 10));
-                        //System.out.println("Winged: " +e.isWinged());
-                        if ((Math.abs(e.getX() - sim.getX())== 0) && ((Math.abs(e.getY() - sim.getY()) != 0) || (Math.abs(e.getY() - sim.getY()) < 8)) && e.isWinged())
-                        {
-                            e.setYA((sim.getY() - e.getAccurateY()) *0.95F +0.6F );
-                            e.setY(sim.getY());
-                            foundOne = true;
-                        }
-
-                        //System.out.println("Perfect X match: " +(Math.abs(e.getX() - sim.getX())== 0));
-                        //System.out.println("Y doesn't match: " + (Math.abs(e.getY() - sim.getY()) != 0));
-                        //System.out.println("Y off by less than 2: " +(Math.abs(e.getY() - sim.getY()) <=2));
-                        //System.out.println("Accurate Y set: " + (e.getAccurateY() !=0));
-                        //System.out.println("YA is unknown: " + e.isYAUnknown());
-                        if ((Math.abs(e.getX() - sim.getX())== 0) && (Math.abs(e.getY() - sim.getY()) != 0) && (Math.abs(e.getY() - sim.getY()) <=2) && (e.getAccurateY() !=0) && e.isYAUnknown())
-                        {
-                            float newYA;
-
-                            if (sim.getY() - e.getAccurateY() > 0)
-                            {
-                                newYA = (sim.getY() - e.getAccurateY()) * 0.89F + 2;
-                            }
-                            else
-                            {
-                                newYA = e.getYA() * 0.85F;
-                            }
-
-                            e.setYA(newYA);
-                            e.setY(sim.getY());
-                            e.setKnownYA();
-                            foundOne = true;
-                        }
-                        if ((Math.abs(e.getX() - sim.getX()) == 0 ) && (Math.abs(e.getY() - sim.getY()) == 0))
-                        {
-                            foundOne = true;
-                        }
-                    }
-                }
-
-                if (foundOne)
-                {
-                    // XA = (X - lastX) * 0.89F
-                    System.out.println("Updating!");
-                    e.setAccurateY(sim.getY());
-                    e.setAccurateX(sim.getX());
-                    newEnemies.add(e);
-                }
-            }
-            if(!foundOne)
-            {
-                System.out.println("Adding!");
-                sim.setXA(2);
-                sim.setAccurateY(sim.getY());
-                sim.setAccurateX(sim.getX());
-                sim.drop();
-                //sim.move();
-                newEnemies.add(sim);
-            }
-
-             */
     }
 
-    public int getCount() {
+    /**
+     * Gets the number of on screen enemies.
+     *
+     * @return the count
+     */
+    public int getCount() 
+    {
         return enemiesList.size();
     }
 
 
+    /**
+     * Returns this instances copy of the enemy list.  
+     * <b> changing will affect this instance </b>
+     *
+     * @return the enemies list
+     */
     public ArrayList<SpriteSim> getEnemiesList()
     {
         return enemiesList;
     }
 
 
-    public EnemySim createEnemy(float _x, float _y, int _type)
+    /**
+     * Creates a new EnemySim based on the type value.
+     *
+     * @param _x the x location of the enemy
+     * @param _y the y location of the enemy
+     * @param _type the type of the enemy
+     * @param _sim the current MarioSim
+     * @return a new EnemySim
+     */
+    public EnemySim createEnemy(float _x, float _y, int _type, MarioSim _sim)
     {
         switch (_type)
         {
@@ -388,7 +263,7 @@ public class Enemy implements Cloneable
             case Sprite.KIND_FIRE_FLOWER:
                 return new FireFlowerSim(_x, _y, _type);
             case Sprite.KIND_ENEMY_FLOWER:
-                return new EnemyFlowerSim(_x, _y, _type);
+                return new EnemyFlowerSim(_x, _y, _type, _sim);
             case Sprite.KIND_BULLET_BILL:
                 return new BulletSim(_x, _y, _type);
             case Sprite.KIND_WAVE_GOOMBA:
@@ -402,6 +277,12 @@ public class Enemy implements Cloneable
         }
     }
 
+    /**
+     * Returns a string representation of the enemy type supplied
+     *
+     * @param _type the type to name
+     * @return the enemy name
+     */
     public static String nameEnemy(int _type)
     {
         String enemyName = "Unknown";
@@ -443,7 +324,6 @@ public class Enemy implements Cloneable
             case Sprite.KIND_FIREBALL:
                 return "Fireball";
         }
-
         return enemyName;
     }
 }

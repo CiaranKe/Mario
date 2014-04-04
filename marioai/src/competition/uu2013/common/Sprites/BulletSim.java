@@ -1,7 +1,24 @@
+/*
+ * 
+ */
 package competition.uu2013.common.Sprites;
 
+/**
+ *  BullitSim. Copy of the BullitBill class from MAIB
+ *  
+ *  
+ *  Added getter and setter methods in addition  to the clone method.
+ */
 public class BulletSim extends EnemySim implements Cloneable
 {
+    
+    /**
+     * Instantiates a new bullet sim.
+     *
+     * @param _x 
+     * @param _y the _y
+     * @param _type the _type
+     */
     public BulletSim(float _x, float _y, int _type)
     {
         super(_x, _y, _type);
@@ -12,16 +29,19 @@ public class BulletSim extends EnemySim implements Cloneable
         deadTime = 0;
     }
 
+    /* (non-Javadoc)
+     * @see competition.uu2013.common.Sprites.EnemySim#clone()
+     */
     @Override
     public BulletSim clone() throws CloneNotSupportedException
     {
-        BulletSim n = new BulletSim(this.x, this.y,this.type);
-        n.x = this.x;
-        n.y = this.y;
-        n.xa = this.xa;
-        n.ya = this.ya;
+        BulletSim n = new BulletSim(this.xLocation, this.yLocation,this.simType);
+        n.xLocation = this.xLocation;
+        n.yLocation = this.yLocation;
+        n.xAcceleration = this.xAcceleration;
+        n.yAcceleration = this.yAcceleration;
         n.facing = this.facing;
-        n.type = this.type;
+        n.simType = this.simType;
         n.lastX = this.lastX;
         n.lastY = this.lastY;
         n.height = this.height;
@@ -44,24 +64,27 @@ public class BulletSim extends EnemySim implements Cloneable
         return n;
     }
 
+    /* (non-Javadoc)
+     * @see competition.uu2013.common.Sprites.EnemySim#collideCheck()
+     */
     public void collideCheck()
     {
         if (dead) return;
 
-        float xMarioD = marioSim.getX() - x;
-        float yMarioD = marioSim.getY() - y;
+        float xMarioD = marioSim.getXLocation() - xLocation;
+        float yMarioD = marioSim.getYLocation() - yLocation;
         float w = 16;
         if (xMarioD > -16 && xMarioD < 16)
         {
-            if (yMarioD > -height && yMarioD < marioSim.height())
+            if (yMarioD > -height && yMarioD < marioSim.getHeight())
             {
                 if (marioSim.getYa() > 0 && yMarioD <= 0 && (!marioSim.isOnGround() || !marioSim.wasOnGround()))
                 {
                     marioSim.stomp(this);
                     dead = true;
 
-                    xa = 0;
-                    ya = 1;
+                    xAcceleration = 0;
+                    yAcceleration = 1;
                     deadTime = 100;
                 } else
                 {
@@ -71,13 +94,16 @@ public class BulletSim extends EnemySim implements Cloneable
         }
     }
 
+    /* (non-Javadoc)
+     * @see competition.uu2013.common.Sprites.EnemySim#move()
+     */
     public void move()
     {
-        if (xa > 0)
+        if (xAcceleration > 0)
         {
             facing = 1;
         }
-        else if (xa < 0)
+        else if (xAcceleration < 0)
         {
             facing = -1;
         }
@@ -92,36 +118,45 @@ public class BulletSim extends EnemySim implements Cloneable
                 return;
             }
 
-            x += xa;
-            y += ya;
-            ya *= 0.95;
-            ya += 1;
+            xLocation += xAcceleration;
+            yLocation += yAcceleration;
+            yAcceleration *= 0.95;
+            yAcceleration += 1;
 
             return;
         }
 
         float sideWaysSpeed = 4f;
 
-        xa = facing * sideWaysSpeed;
-        move(xa, 0);
+        xAcceleration = facing * sideWaysSpeed;
+        move(xAcceleration, 0);
     }
 
+    /* (non-Javadoc)
+     * @see competition.uu2013.common.Sprites.EnemySim#move(float, float)
+     */
     public boolean move(float xa, float ya)
     {
-        x += xa;
+        xLocation += xa;
         return true;
     }
 
+    /**
+     * Fireball collide check.
+     *
+     * @param fireball the fireball
+     * @return true, if successful
+     */
     public boolean fireballCollideCheck(FireBallSim fireball)
     {
         if (deadTime != 0) return false;
 
-        float xD = fireball.getX() - x;
-        float yD = fireball.getY() - y;
+        float xD = fireball.getXLocation() - xLocation;
+        float yD = fireball.getYLocation() - yLocation;
 
         if (xD > -16 && xD < 16)
         {
-            if (yD > -height && yD < fireball.height())
+            if (yD > -height && yD < fireball.getHeight())
             {
                 return true;
             }
@@ -129,21 +164,27 @@ public class BulletSim extends EnemySim implements Cloneable
         return false;
     }
 
+    /**
+     * Shell collide check.
+     *
+     * @param shell the shell
+     * @return true, if successful
+     */
     public boolean shellCollideCheck(ShellSim shell)
     {
         if (deadTime != 0) return false;
 
-        float xD = shell.getX() - x;
-        float yD = shell.getY() - y;
+        float xD = shell.getXLocation() - xLocation;
+        float yD = shell.getYLocation() - yLocation;
 
         if (xD > -16 && xD < 16)
         {
-            if (yD > -height && yD < shell.height())
+            if (yD > -height && yD < shell.getHeight())
             {
                 dead = true;
 
-                xa = 0;
-                ya = 1;
+                xAcceleration = 0;
+                yAcceleration = 1;
                 deadTime = 100;
 
                 return true;
@@ -152,7 +193,10 @@ public class BulletSim extends EnemySim implements Cloneable
         return false;
     }
 
-    public int height()
+    /* (non-Javadoc)
+     * @see competition.uu2013.common.Sprites.EnemySim#getHeight()
+     */
+    public int getHeight()
     {
         return this.height;
     }

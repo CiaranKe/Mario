@@ -1,3 +1,6 @@
+/*
+ * 
+ */
 package competition.uu2013.common.Sprites;
 
 import ch.idsia.benchmark.mario.engine.sprites.Sprite;
@@ -5,6 +8,7 @@ import competition.uu2013.common.level.Enemy;
 import competition.uu2013.common.level.Map;
 import competition.uu2013.common.level.WorldSim;
 
+// TODO: Auto-generated Javadoc
 /**
  * Created with IntelliJ IDEA.
  * User: fluffy
@@ -15,38 +19,88 @@ import competition.uu2013.common.level.WorldSim;
 public class EnemySim extends SpriteSim implements Comparable
 {
 
+    /** The Constant SIDE_WAY_SPEED. */
     public static final float SIDE_WAY_SPEED = 1.75f;
+    
+    /** The last y. */
     protected float lastX, lastY;
+    
+    /** The height. */
     protected int height;
+    
+    /** The width. */
     protected int width;
+    
+    /** The avoid cliffs. */
     protected boolean avoidCliffs; //red koopa
+    
+    /** The winged. */
     protected boolean winged;
+    
+    /** The on ground. */
     protected boolean onGround;
+    
+    /** The seen. */
     protected boolean seen;
+    
+    /** The fly death. */
     protected boolean flyDeath; //bumpCheck, fireballCollide, shellCollide
+    
+    /** The dead time. */
     protected int deadTime;
+    
+    /** The no fireball death. */
     protected boolean noFireballDeath;
+    
+    /** The dead. */
     protected boolean dead;
+    
+    /** The mario sim. */
     protected MarioSim marioSim;
+    
+    /** The world sim. */
     protected WorldSim worldSim;
+    
+    /** The accurate y. */
     protected float accurateY;
+    
+    /** The accurate x. */
     protected float accurateX;
+    
+    /** The ya unknown. */
     protected boolean yaUnknown;
+    
+    /** The first move. */
     protected boolean firstMove;
+    
+    /** The old x. */
     protected float oldX;
+    
+    /** The old y. */
     protected float oldY;
+    
+    /** The map. */
     protected Map map;
+    
+    /** The already in scope. */
     protected boolean alreadyInScope;
 
+    /**
+     * Instantiates a new enemy sim.
+     *
+     * @param _x the _x
+     * @param _y the _y
+     * @param _type the _type
+     */
     public EnemySim(float _x, float _y, int _type )
     {
-        this.x = _x;
-        this.y = _y;
+        this.xLocation = _x;
+        this.yLocation = _y;
         this.firstMove = true;
         this.accurateY = 0;
         this.accurateX = 0;
         this.yaUnknown = true;
-        this.type = _type;
+        this.simType = _type;
         this.deadTime = 0;
         this.dead = false;
         this.flyDeath = false;
@@ -59,7 +113,7 @@ public class EnemySim extends SpriteSim implements Comparable
         this.accurateY = 0;
         this.alreadyInScope = false;
 
-        switch (this.type)
+        switch (this.simType)
         {
             case Sprite.KIND_GOOMBA:
                 break;
@@ -93,16 +147,19 @@ public class EnemySim extends SpriteSim implements Comparable
         }
     }
 
+    /* (non-Javadoc)
+     * @see competition.uu2013.common.Sprites.SpriteSim#clone()
+     */
     @Override
     public EnemySim clone()  throws CloneNotSupportedException
     {
-        EnemySim n = new EnemySim(this.x, this.y, this.type);
-        n.x = this.x;
-        n.y = this.y;
-        n.xa = this.xa;
-        n.ya = this.ya;
+        EnemySim n = new EnemySim(this.xLocation, this.yLocation, this.simType);
+        n.xLocation = this.xLocation;
+        n.yLocation = this.yLocation;
+        n.xAcceleration = this.xAcceleration;
+        n.yAcceleration = this.yAcceleration;
         n.facing = this.facing;
-        n.type = this.type;
+        n.simType = this.simType;
         n.lastX = this.lastX;
         n.lastY = this.lastY;
         n.height = this.height;
@@ -125,96 +182,148 @@ public class EnemySim extends SpriteSim implements Comparable
         return n;
     }
 
+    /**
+     * Checks if is winged.
+     *
+     * @return true, if is winged
+     */
     public boolean isWinged()
     {
         return this.winged;
     }
 
+    /**
+     * Sets the world sim.
+     *
+     * @param _worldSim the new world sim
+     */
     public void setWorldSim(WorldSim _worldSim)
     {
         this.worldSim = _worldSim;
     }
 
+    /**
+     * Sets the mario sim.
+     *
+     * @param _marioSim the new mario sim
+     */
     public void setMarioSim(MarioSim _marioSim)
     {
         this.marioSim = _marioSim;
     }
 
+    /**
+     * Sets the map sim.
+     *
+     * @param _map the new map sim
+     */
     public void setMapSim (Map _map)
     {
         this.map = _map;
     }
 
-    public int height ()
+    /* (non-Javadoc)
+     * @see competition.uu2013.common.Sprites.SpriteSim#getHeight()
+     */
+    public int getHeight ()
     {
         return this.height;
     }
 
+    /* (non-Javadoc)
+     * @see competition.uu2013.common.Sprites.SpriteSim#setXYLocation(float, float)
+     */
     @Override
-    public void setXY(float _x, float _y)
+    public void setXYLocation(float _x, float _y)
     {
-        this.lastX = this.x;
-        this.lastY = this.y;
-        this.x = _x;
-        this.y = _y;
-        this.xa = this.x - this.lastX;
-        this.ya = (this.y - this.lastY);
+        this.lastX = this.xLocation;
+        this.lastY = this.yLocation;
+        this.xLocation = _x;
+        this.yLocation = _y;
+        this.xAcceleration = this.xLocation - this.lastX;
+        this.yAcceleration = (this.yLocation - this.lastY);
 
-        if (this.xa == 0)
+        if (this.xAcceleration == 0)
         {
             deadTime = 9;
         }
     }
 
+    /**
+     * Gets the xa.
+     *
+     * @return the xa
+     */
     public float getXA()
     {
-        return this.xa;
+        return this.xAcceleration;
     }
 
+    /**
+     * Gets the ya.
+     *
+     * @return the ya
+     */
     public float getYA()
     {
-        return this.ya;
+        return this.yAcceleration;
     }
 
+    /**
+     * Sets the xy.
+     *
+     * @param _x the _x
+     * @param _y the _y
+     * @param _xa the _xa
+     * @param _ya the _ya
+     */
     public void setXY(float _x, float _y, float _xa, float _ya)
     {
-        this.lastX = this.x;
-        this.lastY = this.y;
-        this.x = _x;
-        this.y = _y;
-        this.xa = _xa;
-        this.ya = _ya;
+        this.lastX = this.xLocation;
+        this.lastY = this.yLocation;
+        this.xLocation = _x;
+        this.yLocation = _y;
+        this.xAcceleration = _xa;
+        this.yAcceleration = _ya;
 
-        if (this.xa == 0)
+        if (this.xAcceleration == 0)
         {
             deadTime = 9;
         }
     }
 
+    /**
+     * 
+     * Enemies move twice before being shown to the agent, this method simulates the XA and YA
+     * VAlues the sprites have as they are shown.
+     *   
+     */
     public void drop()
     {
         if (this.winged && !this.seen)
         {
             this.seen = true;
-            //this.y -=  10.0F;
-            this.ya = -10.F;
+            this.yAcceleration = -10.F;
         }
         else if (!this.winged && !this.seen)
         {
             this.seen = true;
-            this.xa = 2;
-            this.ya = 1.7F;
+            this.xAcceleration = 2;
+            this.yAcceleration = 1.7F;
             this.onGround = true;
 
         }
     }
 
+    /* (non-Javadoc)
+     * @see competition.uu2013.common.Sprites.SpriteSim#move()
+     */
     public void move()
     {
-        this.oldX = x;
-        this.oldY = y;
+        this.oldX = xLocation;
+        this.oldY = yLocation;
 
-        if (xa == -1.5575F && ya == 1.7F)
+        if (xAcceleration == -1.5575F && yAcceleration == 1.7F)
         {
             System.out.println();
         }
@@ -230,10 +339,10 @@ public class EnemySim extends SpriteSim implements Comparable
 
             if (flyDeath)
             {
-                x += xa;
-                y += ya;
-                ya *= 0.95;
-                ya += 1;
+                xLocation += xAcceleration;
+                yLocation += yAcceleration;
+                yAcceleration *= 0.95;
+                yAcceleration += 1;
             }
             return;
         }
@@ -241,48 +350,55 @@ public class EnemySim extends SpriteSim implements Comparable
         float sideWaysSpeed = 1.75f;
         //        float sideWaysSpeed = onGround ? 2.5f : 1.2f;
 
-        if (xa > 2)
+        if (xAcceleration > 2)
             facing = 1;
-        else if (xa < -2)
+        else if (xAcceleration < -2)
             facing = -1;
 
-        xa = facing * sideWaysSpeed;
+        xAcceleration = facing * sideWaysSpeed;
 //    xa += facing == 1 ? -wind : wind;
 //        mayJump = (onGround);
 
 
 
-        if (!move(xa, 0)) facing = -facing;
+        if (!move(xAcceleration, 0)) facing = -facing;
         onGround = false;
-        move(0, ya);
+        move(0, yAcceleration);
 
 
 
-        ya *= winged ? 0.95f : 0.85f;
+        yAcceleration *= winged ? 0.95f : 0.85f;
         if (onGround)
         {
-            xa *= (GROUND_INERTIA + windScale(windCoeff, facing) + iceScale(iceCoeff));
+            xAcceleration *= (GROUND_INERTIA + windScale(windCoeff, facing) + iceScale(iceCoeff));
         } else
         {
-            xa *= (AIR_INERTIA + windScale(windCoeff, facing) + iceScale(iceCoeff));
+            xAcceleration *= (AIR_INERTIA + windScale(windCoeff, facing) + iceScale(iceCoeff));
         }
 
         if (!onGround)
         {
             if (winged)
             {
-                ya += 0.6f * 1.0F;
+                yAcceleration += 0.6f * 1.0F;
             } else
             {
-                ya += 2.0F;
+                yAcceleration += 2.0F;
             }
         } else if (winged)
         {
-            ya = -10;
+            yAcceleration = -10;
         }
         //System.out.println("Sim\t: X:\t"+x + " XA:\t" +xa + " Y:\t" +y + " YA:\t" + ya + " OnGround: " + onGround);
     }
 
+    /**
+     * Move.
+     *
+     * @param xa the xa
+     * @param ya the ya
+     * @return true, if successful
+     */
     public boolean move(float xa, float ya)
     {
         while (xa > 8)
@@ -312,33 +428,33 @@ public class EnemySim extends SpriteSim implements Comparable
 
         if (ya > 0)
         {
-            if (isBlocking(x + xa - width, y + ya, xa, 0)) collide = true;
-            else if (isBlocking(x + xa + width, y + ya, xa, 0)) collide = true;
-            else if (isBlocking(x + xa - width, y + ya + 1, xa, ya)) collide = true;
-            else if (isBlocking(x + xa + width, y + ya + 1, xa, ya)) collide = true;
+            if (isBlocking(xLocation + xa - width, yLocation + ya, xa, 0)) collide = true;
+            else if (isBlocking(xLocation + xa + width, yLocation + ya, xa, 0)) collide = true;
+            else if (isBlocking(xLocation + xa - width, yLocation + ya + 1, xa, ya)) collide = true;
+            else if (isBlocking(xLocation + xa + width, yLocation + ya + 1, xa, ya)) collide = true;
         }
         if (ya < 0)
         {
-            if (isBlocking(x + xa, y + ya - height, xa, ya)) collide = true;
-            else if (collide || isBlocking(x + xa - width, y + ya - height, xa, ya)) collide = true;
-            else if (collide || isBlocking(x + xa + width, y + ya - height, xa, ya)) collide = true;
+            if (isBlocking(xLocation + xa, yLocation + ya - height, xa, ya)) collide = true;
+            else if (collide || isBlocking(xLocation + xa - width, yLocation + ya - height, xa, ya)) collide = true;
+            else if (collide || isBlocking(xLocation + xa + width, yLocation + ya - height, xa, ya)) collide = true;
         }
         if (xa > 0)
         {
-            if (isBlocking(x + xa + width, y + ya - height, xa, ya)) collide = true;
-            if (isBlocking(x + xa + width, y + ya - height / 2, xa, ya)) collide = true;
-            if (isBlocking(x + xa + width, y + ya, xa, ya)) collide = true;
+            if (isBlocking(xLocation + xa + width, yLocation + ya - height, xa, ya)) collide = true;
+            if (isBlocking(xLocation + xa + width, yLocation + ya - height / 2, xa, ya)) collide = true;
+            if (isBlocking(xLocation + xa + width, yLocation + ya, xa, ya)) collide = true;
 
-            if (avoidCliffs && onGround && !map.isBlocking((int) ((x + xa + width) / 16), (int) ((y) / 16 + 1),ya))
+            if (avoidCliffs && onGround && !map.isBlocking((int) ((xLocation + xa + width) / 16), (int) ((yLocation) / 16 + 1),ya))
                 collide = true;
         }
         if (xa < 0)
         {
-            if (isBlocking(x + xa - width, y + ya - height, xa, ya)) collide = true;
-            if (isBlocking(x + xa - width, y + ya - height / 2, xa, ya)) collide = true;
-            if (isBlocking(x + xa - width, y + ya, xa, ya)) collide = true;
+            if (isBlocking(xLocation + xa - width, yLocation + ya - height, xa, ya)) collide = true;
+            if (isBlocking(xLocation + xa - width, yLocation + ya - height / 2, xa, ya)) collide = true;
+            if (isBlocking(xLocation + xa - width, yLocation + ya, xa, ya)) collide = true;
 
-            if (avoidCliffs && onGround && !map.isBlocking((int) ((x + xa - width) / 16), (int) ((y) / 16 + 1),ya))
+            if (avoidCliffs && onGround && !map.isBlocking((int) ((xLocation + xa - width) / 16), (int) ((yLocation) / 16 + 1),ya))
                 collide = true;
         }
 
@@ -346,39 +462,48 @@ public class EnemySim extends SpriteSim implements Comparable
         {
             if (xa < 0)
             {
-                x = (int) ((x - width) / 16) * 16 + width;
-                this.xa = 0;
+                xLocation = (int) ((xLocation - width) / 16) * 16 + width;
+                this.xAcceleration = 0;
             }
             if (xa > 0)
             {
-                x = (int) ((x + width) / 16 + 1) * 16 - width - 1;
-                this.xa = 0;
+                xLocation = (int) ((xLocation + width) / 16 + 1) * 16 - width - 1;
+                this.xAcceleration = 0;
             }
             if (ya < 0)
             {
-                y = (int) ((y - height) / 16) * 16 + height;
+                yLocation = (int) ((yLocation - height) / 16) * 16 + height;
 //                jumpTime = 0;
-                this.ya = 0;
+                this.yAcceleration = 0;
             }
             if (ya > 0)
             {
-                y = (int) (y / 16 + 1) * 16 - 1;
+                yLocation = (int) (yLocation / 16 + 1) * 16 - 1;
                 onGround = true;
             }
             return false;
         } else
         {
-            x += xa;
-            y += ya;
+            xLocation += xa;
+            yLocation += ya;
             return true;
         }
     }
 
+    /**
+     * Checks if is blocking.
+     *
+     * @param _x the _x
+     * @param _y the _y
+     * @param xa the xa
+     * @param ya the ya
+     * @return true, if is blocking
+     */
     private boolean isBlocking(float _x, float _y, float xa, float ya)
     {
         int x = (int) (_x / 16);
         int y = (int) (_y / 16);
-        if (x == (int) (this.x / 16) && y == (int) (this.y / 16)) return false;
+        if (x == (int) (this.xLocation / 16) && y == (int) (this.yLocation / 16)) return false;
 
         boolean blocking = map.isBlocking(x, y, ya);
 
@@ -388,11 +513,14 @@ public class EnemySim extends SpriteSim implements Comparable
     }
 
 
+    /* (non-Javadoc)
+     * @see java.lang.Comparable#compareTo(java.lang.Object)
+     */
     public int compareTo(Object o)
     {
         EnemySim oldSim = (EnemySim) o;
 
-        if (this.type != oldSim.getType() )
+        if (this.simType != oldSim.getType() )
         {
             return -1;
         }
@@ -403,12 +531,12 @@ public class EnemySim extends SpriteSim implements Comparable
         //allow a 2 pixel diff for movement.
         float maxDelta = 2.01f * SIDE_WAY_SPEED;
 
-        if (Math.abs(oldSim.getX() - this.x) < maxDelta)
+        if (Math.abs(oldSim.getXLocation() - this.xLocation) < maxDelta)
         {
             xMatch = true;
         }
 
-        if (Math.abs(oldSim.getY() - this.y) < (maxDelta + 10.0F))
+        if (Math.abs(oldSim.getYLocation() - this.yLocation) < (maxDelta + 10.0F))
         {
             yMatch = true;
         }
@@ -420,6 +548,13 @@ public class EnemySim extends SpriteSim implements Comparable
         return -1;
     }
 
+    /**
+     * Bump check.
+     *
+     * @param xTile the x tile
+     * @param yTile the y tile
+     * @param marioSim the mario sim
+     */
     public void bumpCheck(int xTile, int yTile, MarioSim marioSim)
     {
         if (deadTime != 0)
@@ -427,19 +562,24 @@ public class EnemySim extends SpriteSim implements Comparable
             return;
         }
 
-        if (x + width > xTile * 16 && x - width < xTile * 16 + 16 && yTile == (int) ((y - 1) / 16))
+        if (xLocation + width > xTile * 16 && xLocation - width < xTile * 16 + 16 && yTile == (int) ((yLocation - 1) / 16))
         {
-            xa = -marioSim.getFacing() * 2;
-            ya = -5;
+            xAcceleration = -marioSim.getFacing() * 2;
+            yAcceleration = -5;
             flyDeath = true;
             deadTime = 100;
             winged = false;
         }
     }
 
+    /**
+     * Can kill.
+     *
+     * @return true, if successful
+     */
     public final boolean canKill()
     {
-        switch (type)
+        switch (simType)
         {
             case Sprite.KIND_ENEMY_FLOWER:
             case Sprite.KIND_SPIKY:
@@ -449,6 +589,9 @@ public class EnemySim extends SpriteSim implements Comparable
         return false;
     }
 
+    /* (non-Javadoc)
+     * @see competition.uu2013.common.Sprites.SpriteSim#collideCheck()
+     */
     @Override
     public void collideCheck()
     {
@@ -457,13 +600,13 @@ public class EnemySim extends SpriteSim implements Comparable
             return;
         }
 
-        float xMarioD = marioSim.getX() - x;
-        float yMarioD = marioSim.getY() - y;
-        float height = this.height();
+        float xMarioD = marioSim.getXLocation() - xLocation;
+        float yMarioD = marioSim.getYLocation() - yLocation;
+        float height = this.getHeight();
 
 
         if (xMarioD > -width*2-4 && xMarioD < width*2+4) {
-            if (yMarioD > -height && yMarioD < marioSim.height()) {
+            if (yMarioD > -height && yMarioD < marioSim.getHeight()) {
                 if (!canKill() && marioSim.getYa() > 0 && yMarioD <= 0 && (!marioSim.wasOnGround() || !marioSim.isOnGround()))
                 {
                     marioSim.stomp(this);
@@ -476,6 +619,9 @@ public class EnemySim extends SpriteSim implements Comparable
         }
     }
 
+    /* (non-Javadoc)
+     * @see competition.uu2013.common.Sprites.SpriteSim#checkFireballCollide(competition.uu2013.common.Sprites.FireBallSim)
+     */
     @Override
     public boolean checkFireballCollide(FireBallSim fireball)
     {
@@ -484,8 +630,8 @@ public class EnemySim extends SpriteSim implements Comparable
             return false;
         }
 
-        float xD = fireball.getX() - x;
-        float yD = fireball.getY() - y;
+        float xD = fireball.getXLocation() - xLocation;
+        float yD = fireball.getYLocation() - yLocation;
 
         if (xD > -16 && xD < 16)
         {
@@ -496,8 +642,8 @@ public class EnemySim extends SpriteSim implements Comparable
                     return true;
                 }
 
-                xa = fireball.facing * 2;
-                ya = -5;
+                xAcceleration = fireball.facing * 2;
+                yAcceleration = -5;
                 flyDeath = true;
                 this.dead = true;
                 deadTime = 100;
@@ -508,6 +654,9 @@ public class EnemySim extends SpriteSim implements Comparable
         return false;
     }
 
+    /* (non-Javadoc)
+     * @see competition.uu2013.common.Sprites.SpriteSim#checkShellCollide(competition.uu2013.common.Sprites.ShellSim)
+     */
     public void checkShellCollide(ShellSim shell)
     {
         if (deadTime != 0)
@@ -515,15 +664,15 @@ public class EnemySim extends SpriteSim implements Comparable
             return;
         }
 
-        float xD = shell.x - x;
-        float yD = shell.y - y;
+        float xD = shell.xLocation - xLocation;
+        float yD = shell.yLocation - yLocation;
 
         if (xD > -16 && xD < 16)
         {
             if (yD > -height && yD < shell.height)
             {
-                xa = shell.facing * 2;
-                ya = -5;
+                xAcceleration = shell.facing * 2;
+                yAcceleration = -5;
                 flyDeath = true;
                 deadTime = 100;
                 winged = false;
@@ -532,61 +681,125 @@ public class EnemySim extends SpriteSim implements Comparable
     }
 
 
+    /**
+     * Sets the facing.
+     *
+     * @param _facing the new facing
+     */
     public void setFacing(int _facing)
     {
         this.facing = _facing;
     }
 
+    /**
+     * Sets the x.
+     *
+     * @param _x the new x
+     */
     public void setX(float _x)
     {
-        this.x = _x;
+        this.xLocation = _x;
     }
 
+    /**
+     * Sets the ya.
+     *
+     * @param _ya the new ya
+     */
     public void setYA(float _ya)
     {
-        this.ya = _ya;
+        this.yAcceleration = _ya;
     }
 
+    /**
+     * Sets the y.
+     *
+     * @param _y the new y
+     */
     public void setY(float _y)
     {
-        this.y = _y;
+        this.yLocation = _y;
     }
 
+    /**
+     * Gets the accurate y.
+     *
+     * @return the accurate y
+     */
     public float getAccurateY()
     {
         return accurateY;
     }
 
+    /**
+     * Checks if is YA unknown.
+     *
+     * @return true, if is YA unknown
+     */
     public boolean isYAUnknown()
     {
         return yaUnknown;
     }
 
+    /**
+     * Sets the known ya.
+     *
+     * @param known the new known ya
+     */
     public void setKnownYA(boolean known)
     {
         this.yaUnknown = known;
     }
 
-    public void setAccurateY(float _accurateY)
+    /**
+     * Sets the accurate y location.
+     *
+     * @param _accurateY the new accurate y location
+     */
+    public void setAccurateYLocation(float _accurateY)
     {
         this.accurateY = _accurateY;
     }
 
+    /**
+     * Sets the xa.
+     *
+     * @param _xa the new xa
+     */
     public void setXA(float _xa)
     {
-        this.xa = _xa;
+        this.xAcceleration = _xa;
     }
 
-    public void setAccurateX(float _accurateX)
+    /**
+     * Sets the accurate x location.
+     *
+     * @param _accurateX the new accurate x location
+     */
+    public void setAccurateXLocation(float _accurateX)
     {
         this.accurateX = _accurateX;
     }
 
+    /**
+     * Gets the accurate x.
+     *
+     * @return the accurate x
+     */
     public float getAccurateX()
     {
         return accurateX;
     }
 
+    /**
+     * Determines if an enemy has entered the scope of the Receptive field and should be tracked 
+     *
+     * @param marioX Mario's X Position
+     * @param marioY Mario's Y position
+     * @param halfSceneWidth Half the receptive field width
+     * @param halfSceneHeight Half the receptive field height
+     * @return true, if new to scope
+     */
     public boolean newWithinScope(float marioX, float marioY, int halfSceneWidth, int halfSceneHeight)
     {
         if (!alreadyInScope  && this.withinScope(marioX, marioY, halfSceneWidth, halfSceneHeight))
@@ -596,6 +809,15 @@ public class EnemySim extends SpriteSim implements Comparable
         return !alreadyInScope;
     }
 
+    /**
+     * Determines if an enemy is in the scope of the Receptive field and should be tracked 
+     *
+     * @param marioX Mario's X Position
+     * @param marioY Mario's Y position
+     * @param halfSceneWidth Half the receptive field width
+     * @param halfSceneHeight Half the receptive field height
+     * @return true, if new to scope
+     */
     public boolean withinScope(float marioX, float marioY, int halfSceneWidth, int halfSceneHeight)
     {
         float lookAHead = marioX + (halfSceneWidth * 16);
@@ -603,15 +825,19 @@ public class EnemySim extends SpriteSim implements Comparable
         float lookBehind = marioX - (halfSceneWidth * 16);
         float lookAbove = marioY - (halfSceneHeight * 16);
 
-        if ((this.x < lookAHead) && (this.y < lookBelow) && (this.x > lookBehind) && (this.y > lookAbove))
+        if ((this.xLocation < lookAHead) && (this.yLocation < lookBelow) && (this.xLocation > lookBehind) && (this.yLocation > lookAbove))
         {
             return true;
         }
         return false;
     }
 
+    /** 
+     * Provides a string representation of the sprite, used for debugging purposes. 
+     * @see competition.uu2013.common.Sprites.SpriteSim#toString()
+     */
     public String toString()
     {
-        return Enemy.nameEnemy(this.type) + ", X: " + this.getX() + ", Y: " + this.getY() + ", height: " + this.height + ", width: " + this.width +  ", Dead: " + this.dead;
+        return Enemy.nameEnemy(this.simType) + ", X: " + this.getXLocation() + ", Y: " + this.getYLocation() + ", height: " + this.height + ", width: " + this.width +  ", Dead: " + this.dead;
     }
 }

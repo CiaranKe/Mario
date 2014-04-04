@@ -1,5 +1,9 @@
+/*
+ * 
+ */
 package competition.uu2013.common.Sprites;
 
+// TODO: Auto-generated Javadoc
 /**
  * Created with IntelliJ IDEA.
  * User: fluffy
@@ -9,8 +13,17 @@ package competition.uu2013.common.Sprites;
  */
 public class FireFlowerSim extends EnemySim implements Cloneable
 {
+    
+    /** The life. */
     private int life;
 
+    /**
+     * Instantiates a new fire flower sim.
+     *
+     * @param _x the _x
+     * @param _y the _y
+     * @param _type the _type
+     */
     public FireFlowerSim(float _x, float _y, int _type)
     {
         super(_x, _y, _type);
@@ -20,6 +33,9 @@ public class FireFlowerSim extends EnemySim implements Cloneable
         life = 0;
     }
 
+    /* (non-Javadoc)
+     * @see competition.uu2013.common.Sprites.EnemySim#clone()
+     */
     @Override
     public FireFlowerSim clone() throws CloneNotSupportedException
     {
@@ -28,34 +44,43 @@ public class FireFlowerSim extends EnemySim implements Cloneable
         return n;
     }
 
+    /* (non-Javadoc)
+     * @see competition.uu2013.common.Sprites.EnemySim#collideCheck()
+     */
     public void collideCheck()
     {
-        float xMarioD = marioSim.getX() - x;
-        float yMarioD = marioSim.getY() - y;
+        float xMarioD = marioSim.getXLocation() - xLocation;
+        float yMarioD = marioSim.getYLocation() - yLocation;
         float w = 16;
         if (xMarioD > -16 && xMarioD < 16)
         {
-            if (yMarioD > -height && yMarioD < marioSim.height())
+            if (yMarioD > -height && yMarioD < marioSim.getHeight())
             {
                 marioSim.setMode(true, true);
             }
         }
     }
 
+    /* (non-Javadoc)
+     * @see competition.uu2013.common.Sprites.EnemySim#move()
+     */
     public void move()
     {
         if (life < 9)
         {
-            y--;
+            yLocation--;
             life++;
             return;
         }
     }
 
-    public void setXY(float _x, float _y)
+    /* (non-Javadoc)
+     * @see competition.uu2013.common.Sprites.EnemySim#setXYLocation(float, float)
+     */
+    public void setXYLocation(float _x, float _y)
     {
-        this.x = _x;
-        this.y = _y;
+        this.xLocation = _x;
+        this.yLocation = _y;
     }
 
 }
